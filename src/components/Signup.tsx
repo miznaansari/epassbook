@@ -12,7 +12,7 @@ const Signup = () => {
   if (!context) {
     throw new Error("Signup must be used within an AuthProvider");
   }
-  const {credential,setcredential}  = context;
+  const {credential,setcredential,signup}  = context;
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setcredential({ ...credential, [e.target.name]: e.target.value });
@@ -22,6 +22,8 @@ const Signup = () => {
 const handlesubmit = (e: React.FormEvent) => {
   e.preventDefault();
   console.log(credential);
+  signup();
+ 
 };
 
 
@@ -42,7 +44,7 @@ const handlesubmit = (e: React.FormEvent) => {
       <Google />
 
       {/* Login Form */}
-      <form onSubmit={handlesubmit} className="w-full max-w-md bg-white rounded-lg shadow-md mt-4 p-6">
+      <form onSubmit={handlesubmit}  className="w-full max-w-md bg-white rounded-lg shadow-md mt-4 p-6">
       <div className="mb-6">
           <label htmlFor="email" className="block text-sm font-medium text-purple-800">
             Name

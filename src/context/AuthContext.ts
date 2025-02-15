@@ -1,18 +1,14 @@
 import { createContext } from "react";
 
-interface CredentialType {
-  name: string;
-  email: string;
-  dob: string;
-  password: string;
-  cpassword: string;
-}
-
 interface AuthContextType {
-  credential: CredentialType;
-  setcredential: React.Dispatch<React.SetStateAction<CredentialType>>;
+  credential: { name: string; email: string; dob: string; password: string; cpassword: string };
+  setcredential: React.Dispatch<React.SetStateAction<{ name: string; email: string; dob: string; password: string; cpassword: string }>>;
+  loginCredention: { email: string; password: string };
+  setloginCredention: React.Dispatch<React.SetStateAction<{ email: string; password: string }>>;
+  signup: () => void;
+  login: () => void;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType | null>(null);
 
 export default AuthContext;

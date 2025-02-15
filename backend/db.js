@@ -2,9 +2,9 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
  
-
+//mongodb+srv://miznaansari:2sAc7wuwKHHzfnoh@mizna.jfncd.mongodb.net/Epassbook?retryWrites=true&w=majority&appName=Mizna
   try {
-    await mongoose.connect('mongodb+srv://miznaansari:2sAc7wuwKHHzfnoh@mizna.jfncd.mongodb.net/Practice?retryWrites=true&w=majority&appName=Mizna', {
+    await mongoose.connect('mongodb://localhost:27017/epassbook', {
       useNewUrlParser: true,
       useUnifiedTopology: true
     });
