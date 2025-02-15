@@ -8,18 +8,19 @@ const AuthState = ({ children }: any) => {
   const [loginCredention, setloginCredention] = useState({ email: "", password: "" });  
 
   const url = "http://localhost:4000";
-  const login = async () => {
+  const login = async (): Promise<boolean> => {
     try {
       const response = await axios.post(`${url}/api/login`, loginCredention);
       console.log(response.data);
       alert("Login successful!");
       localStorage.setItem("token", response.data.token);
-      return true; 
+      return true; // ✅ Return true on success
     } catch (error) {
       console.error("Login error:", error);
-      return false; 
+      return false; // ❌ Return false on failure
     }
   };
+  
   const signup = async () => {
     try {
       const response = await axios.post(`${url}/api/create`, credential);

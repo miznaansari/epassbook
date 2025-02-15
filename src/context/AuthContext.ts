@@ -6,7 +6,7 @@ interface AuthContextType {
   loginCredention: { email: string; password: string };
   setloginCredention: React.Dispatch<React.SetStateAction<{ email: string; password: string }>>;
   signup: () => void;
-  login: () => void;
+  login: () => Promise<boolean>; // ✅ Now login returns a Promise<boolean>
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);

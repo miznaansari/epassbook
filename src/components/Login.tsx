@@ -18,15 +18,20 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const success = await login(); // ✅ Call login()
-console.log(success)
-   if(success){
-      navigate("/"); // ✅ Correct way to redirect
-   }else{
-      alert("Invalid credentials. Try again!");
-   }
-    
+    const success: boolean = await login(); // ✅ TypeScript now recognizes this as boolean
+  
+    console.log(success);
+  
+    if (success) {
+      navigate("/"); // ✅ Redirect only on success
+    } else {
+      alert("Invalid credentials. Try again!"); // ❌ Show error message
+    }
   };
+
+
+  
+  
 
   return (
     <div className="mt-18 flex flex-col justify-center items-center px-6 max-w-md m-auto">
@@ -91,3 +96,5 @@ console.log(success)
 };
 
 export default Login;
+
+
