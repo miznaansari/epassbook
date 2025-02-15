@@ -14,7 +14,7 @@ function App() {
         <Routes>
           {/* Show Login on "/login" */}
           <Route path="/login" element={<Login />} />
-          <Route path="/login" element={<Signup />} />
+          <Route path="/signup" element={<Signup />} />
           
           {/* Default route: Show SectionA, SectionB, SectionC */}
           <Route path="/*" element={<MainSections />} />

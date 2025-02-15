@@ -1,4 +1,4 @@
-import { useContext, useState } from "react"
+import { useContext } from "react"
 import AuthContext from "../context/AuthContext";
 import Google from "./Google";
 
@@ -6,7 +6,13 @@ import Google from "./Google";
 const Signup = () => {
 
 
-  const {credential,setcredential} = useContext(AuthContext);
+
+
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("Signup must be used within an AuthProvider");
+  }
+  const {credential,setcredential}  = context;
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setcredential({ ...credential, [e.target.name]: e.target.value });
