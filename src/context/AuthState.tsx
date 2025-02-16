@@ -14,6 +14,7 @@ const AuthState = ({ children }: any) => {
       console.log(response.data);
       alert("Login successful!");
       localStorage.setItem("token", response.data.token);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
       return true; // ✅ Return true on success
     } catch (error) {
       console.error("Login error:", error);
