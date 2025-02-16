@@ -7,8 +7,6 @@ import SectionC from './components/SectionC';
 import Signup from './components/Signup';
 import AuthState from './context/AuthState';
 import Navbar from "./components/Navbar";
-import UpdateAndDeleteModal from "./components/UpdateAndDeleteModal";
-import TxnContext from "./context/TxnContext";
 import TxnState from "./context/TxnState";
 
 function App() {
