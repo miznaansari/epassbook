@@ -5,8 +5,13 @@ interface TxnContextType {
   txnDetail: TxnDetailType;
   setTxnDetail: React.Dispatch<React.SetStateAction<TxnDetailType>>;
   addtxn: () => void;
-
+  fetchallamount: () => void;
+  // todaytxn: () => void;
+  todayAmount: number | null; // Ensure it matches useState type
+  monthlyAmount: number | null; // Ensure it matches useState type
+  // settodayamount: React.Dispatch<React.SetStateAction<number | null>>;
 }
+
 
 // Define the initial transaction structure
 interface TxnDetailType {

@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 
 interface Transaction {
   id: number;
@@ -9,52 +10,64 @@ interface Transaction {
   created_at: string;
 }
 
-const transactions: Transaction[] = [
-  {
-    id: 1,
-    transaction_type: "loan",
-    transaction_name: "John Doe",
-    amount: 5000,
-    transaction_status: "loan_pending",
-    created_at: "2024-02-15T10:00:00Z",
-  },
-  {
-    id: 2,
-    transaction_type: "lending",
-    transaction_name: "Jane Smith",
-    amount: 3000,
-    transaction_status: "lending_received",
-    created_at: "2024-02-14T08:30:00Z",
-  },
-  {
-    id: 3,
-    transaction_type: "all",
-    transaction_name: "Mike Johnson",
-    amount: 2000,
-    transaction_status: "success",
-    created_at: "2024-02-13T14:15:00Z",
-  },
-];
-
 const SectionC: React.FC = () => {
+  const [alltxn, setAllTxn] = useState<Transaction[]>([]);
   const [filter, setFilter] = useState<string>("all");
+  const token = localStorage.getItem("token");
 
-  const filterData = (type: string) => {
-    setFilter(type);
+  const fetchTxn = async () => {
+    try {
+      const response = await axios.post(
+        "http://localhost:4000/api/fetchtxn",
+        { filter: "monthly" },
+        {
+          headers: {
+            Authorization: token,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      // Transform API data safely
+      const formattedData: Transaction[] = response.data.transactions.map(
+        (txn: any) => ({
+          id: txn._id, // Convert `_id` to `id`
+          transaction_type: txn.transaction_type,
+          transaction_name: txn.transaction_name,
+          amount: txn.amount ? parseFloat(txn.amount.$numberDecimal || txn.amount) : 0, // Safely parse amount
+          transaction_status: txn.transaction_status,
+          created_at: txn.createdAt, // Rename `createdAt` to `created_at`
+        })
+      );
+
+      setAllTxn(formattedData);
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+    }
   };
 
+  useEffect(() => {
+    fetchTxn();
+  }, []);
+
+  const filteredTransactions = alltxn.filter(
+    (transaction) => filter === "all" || transaction.transaction_type === filter
+  );
+
   return (
-    <div className="p-4">
-      <div className="flex gap-2 justify-around mt-4 mx-4 tablefilterbtn">
-        <button className="p-2 rounded-lg shadow-md flex-1" onClick={() => filterData("all")}>
-          Transaction
-        </button>
-        <button className="p-2 rounded-lg shadow-md flex-1" onClick={() => filterData("loan")}>
-          Loan
-        </button>
-        <button className="p-2 rounded-lg shadow-md flex-1" onClick={() => filterData("lending")}>
-          Lending
-        </button>
+    <div >
+      <div className="flex gap-2 justify-around mt-4 mx-2 tablefilterbtn">
+        {["all", "loan", "lending"].map((type) => (
+          <button
+            key={type}
+            className={`p-2 rounded-lg shadow-md flex-1 ${
+              filter === type ? "bg-blue-500 text-white" : "bg-gray-200"
+            }`}
+            onClick={() => setFilter(type)}
+          >
+            {type.charAt(0).toUpperCase() + type.slice(1)}
+          </button>
+        ))}
       </div>
 
       <table className="mt-4 w-full text-sm text-left text-gray-700 bg-white rounded-lg shadow-md overflow-hidden">
@@ -67,29 +80,36 @@ const SectionC: React.FC = () => {
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200">
-          {transactions
-            .filter((transaction) => filter === "all" || transaction.transaction_type === filter)
-            .map((transaction) => (
-              <tr key={transaction.id} className="hover:bg-gray-50 transaction-row">
+          {filteredTransactions.length > 0 ? (
+            filteredTransactions.map((transaction) => (
+              <tr
+                key={transaction.id}
+                className="hover:bg-gray-50 transaction-row"
+              >
                 <td className="py-4 px-4 text-[11px]">
-                  {transaction.id} / {transaction.transaction_type}
-                </td>
+  {`...${transaction.id.toString().slice(-4)}`} / {transaction.transaction_type}
+</td>
+
                 <td className="py-4 px-4">{transaction.transaction_name}</td>
-                <td className="py-4 px-4">${transaction.amount}</td>
+                <td className="py-4 px-4">{transaction.amount.toFixed(2)}</td>
                 <td className="py-4 px-4 text-center">
-                  {transaction.transaction_type === "loan" && transaction.transaction_status === "loan_pending" ? (
+                  {transaction.transaction_type === "loan" &&
+                  transaction.transaction_status === "loan_pending" ? (
                     <button className="px-3 py-1 text-xs font-semibold text-blue-700 bg-blue-100 rounded-md hover:bg-blue-200">
                       Pay
                     </button>
-                  ) : transaction.transaction_type === "loan" && transaction.transaction_status === "loan_paid" ? (
+                  ) : transaction.transaction_type === "loan" &&
+                    transaction.transaction_status === "loan_paid" ? (
                     <span className="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-md">
                       Paid
                     </span>
-                  ) : transaction.transaction_type === "lending" && transaction.transaction_status === "lending_pending" ? (
+                  ) : transaction.transaction_type === "lending" &&
+                    transaction.transaction_status === "lending_pending" ? (
                     <button className="px-3 py-1 text-xs font-semibold text-orange-700 bg-orange-100 rounded-md hover:bg-orange-200">
                       Borrow
                     </button>
-                  ) : transaction.transaction_type === "lending" && transaction.transaction_status === "lending_received" ? (
+                  ) : transaction.transaction_type === "lending" &&
+                    transaction.transaction_status === "lending_received" ? (
                     <span className="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-md">
                       Received
                     </span>
@@ -100,15 +120,25 @@ const SectionC: React.FC = () => {
                   )}
                   <br />
                   <p className="text-[10px]">
-                    {new Date(transaction.created_at).toLocaleDateString("en-GB", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "2-digit",
-                    })}
+                    {new Date(transaction.created_at).toLocaleDateString(
+                      "en-GB",
+                      {
+                        day: "2-digit",
+                        month: "short",
+                        year: "2-digit",
+                      }
+                    )}
                   </p>
                 </td>
               </tr>
-            ))}
+            ))
+          ) : (
+            <tr>
+              <td colSpan={4} className="text-center py-4 text-gray-500">
+                No transactions found.
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>

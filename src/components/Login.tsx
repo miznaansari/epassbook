@@ -1,9 +1,11 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom"; // ✅ Import useNavigate
 import AuthContext from "../context/AuthContext";
 import Google from "./Google";
 
 const Login = () => {
+
+  const [Loader, setLoader] = useState(false);
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error("Login must be used within an AuthProvider");
@@ -18,8 +20,9 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoader(true);
     const success: boolean = await login(); // ✅ TypeScript now recognizes this as boolean
-  
+    setLoader(false);
     console.log(success);
   
     if (success) {
@@ -85,10 +88,13 @@ const Login = () => {
         <div>
           <button
             type="submit"
-            className="w-full py-2 px-4 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+            className="w-full flex justify-center items-center py-2 px-4 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
           >
+            <span className={`px-2 ${Loader ? 'motion-safe:animate-spin' : 'hidden'}`}>.</span>
+
             Login
           </button>
+          
         </div>
       </form>
     </div>
