@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import React, { useEffect } from "react";
+import React from "react";
 import './App.css';
 import Login from './components/Login';
 import SectionA from './components/SectionA';
@@ -16,19 +16,6 @@ interface RouteProps {
 }
 
 const App: React.FC = () => {
-  useEffect(() => {
-    // Check token expiry on app load
-    const token = localStorage.getItem("token");
-    if (token) {
-      const parsedToken = JSON.parse(token);
-      const expiry = parsedToken?.expiry || 0;
-      if (Date.now() > expiry) {
-        // If token expired, remove it and redirect to login
-        localStorage.removeItem("token");
-      }
-    }
-  }, []);
-
   return (
     <AuthState>
       <TxnState>
@@ -49,24 +36,10 @@ const App: React.FC = () => {
   );
 };
 
-// ✅ ProtectedRoute - Only allow access if user has a valid token
+// ✅ ProtectedRoute - Only allow access if user has a token
 const ProtectedRoute: React.FC<RouteProps> = ({ component }) => {
   const token = localStorage.getItem("token");
-
-  if (!token) {
-    return <Navigate to="/login" />;
-  }
-
-  // Check token expiry
-  const parsedToken = JSON.parse(token);
-  const expiry = parsedToken?.expiry || 0;
-  if (Date.now() > expiry) {
-    // If expired, remove token and redirect to login
-    localStorage.removeItem("token");
-    return <Navigate to="/login" />;
-  }
-
-  return component;
+  return token ? component : <Navigate to="/login" />;
 };
 
 // ✅ PublicRoute - Prevent logged-in users from accessing login/signup
