@@ -8,6 +8,7 @@ import Signup from './components/Signup';
 import AuthState from './context/AuthState';
 import Navbar from "./components/Navbar";
 import TxnState from "./context/TxnState";
+import BottomNavbar from "./components/BottomNavbar";
 
 function App() {
   return (
@@ -19,11 +20,14 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/*" element={<MainSections />} />
-
         </Routes>
+      <BottomNavbar />
+
       </Router>
+
       </TxnState>
     </AuthState>
+
   );
 }
 
@@ -34,6 +38,7 @@ const MainSections = () => {
       <SectionA />
       <SectionB />
       <SectionC />
+
     </>
   );
 };

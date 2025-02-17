@@ -1,4 +1,19 @@
+import { useContext, useEffect } from "react";
+import TxnContext from "../context/TxnContext";
+
 const SectionA = () => {
+
+  const context = useContext(TxnContext)
+  if (!context) {
+    console.error("TxnContext is null! Ensure TxnState is wrapping this component.");
+    return null;
+  }
+  const {fetchallamount ,todayAmount,monthlyAmount}=context; 
+
+useEffect(() => {
+  fetchallamount()
+}, []);
+
   return (
     <>
      <div className="flex gap-2 justify-around m-2">
@@ -8,8 +23,8 @@ const SectionA = () => {
             <i className="fas fa-wallet text-3xl"></i>
             <div className="ml-4">
               <h2 className="text-sm font-semibold">Today Spend</h2>
-              <p className="text-xl font-bold" id="spend">₹100</p>
-              <h6 className="text-[12px]">₹200 This Month</h6>
+              <p className="text-xl font-bold" id="spend">₹{todayAmount}</p>
+              <h6 className="text-[12px]">₹{monthlyAmount} This Month</h6>
             </div>
           </div>
           <div className="text-center cursor-pointer" id="chartView">
@@ -36,7 +51,7 @@ const SectionA = () => {
       </div>
 
       {/* Total Lending Card with Animated Flip */}
-      <div className="bg-blue-500 text-white p-4 rounded-lg shadow-md flex-1 transform transition duration-300 hover:rotate-y-180">
+      <div className="bg-blue-500 text-white p-4 rounded-lg shadow-md flex-1 transform transition duration-300  ">
         <div className="flex items-center">
           <i className="fas fa-hand-holding-usd text-3xl"></i>
           <div className="ml-4">
