@@ -18,7 +18,7 @@ const SectionC: React.FC = () => {
   const fetchTxn = async () => {
     try {
       const response = await axios.post(
-        "http://localhost:4000/api/fetchtxn",
+        "https://epassbook.onrender.com/api/fetchtxn",
         { filter: "monthly" },
         {
           headers: {

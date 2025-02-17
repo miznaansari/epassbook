@@ -1,20 +1,22 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface Expense {
   id: number;
   name: string;
   amount: number; // Fixed: changed from category to amount
+
 }
 
 interface QuickProps {
   isOpen: boolean;
+  category:string;
   onClose: () => void; // Added missing prop
   onSubmit: (expense: { name: string; amount: number }) => void;
 }
 
-const Quick: React.FC<QuickProps> = ({ onSubmit, isOpen, onClose }) => {
-  const [name, setName] = useState("");
-  const [amount, setAmount] = useState("");
+const Quick: React.FC<QuickProps> = ({ onSubmit, isOpen, onClose ,category}) => {
+  const [quick, setqucik] = useState({"category":"","name":"","cost":""});
+ 
 
   const [expenses ] = useState<Expense[]>([
     { id: 1, name: "Rent", amount: 1000 },
@@ -22,16 +24,23 @@ const Quick: React.FC<QuickProps> = ({ onSubmit, isOpen, onClose }) => {
     { id: 3, name: "Electricity", amount: 150 },
   ]);
 
+  const onChange =(e: React.ChangeEvent<HTMLInputElement>)=>{
+    setqucik({...quick,[e.target.name]:e.target.value});
+  }
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !amount) return;
-    onSubmit({ name, amount: parseFloat(amount) });
-    setName("");
-    setAmount("");
+   console.log(quick);
   };
+  useEffect(() => {
+    setqucik({...quick,category:category});
+   
+  }, [category])
+  
 
   const quickSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log(e);
+
   };
 
   if (!isOpen) return null;
@@ -43,17 +52,20 @@ const Quick: React.FC<QuickProps> = ({ onSubmit, isOpen, onClose }) => {
         <form onSubmit={handleSubmit} className="flex items-center space-x-4 mb-6">
           <input
             type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            value={quick.name}
+            onChange={onChange}
+            name="name"
             placeholder="Name"
             className="w-1/4 border rounded px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 flex-1"
             required
           />
+
           <input
             type="number"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            value={quick.cost}
+            onChange={onChange}
             placeholder="Cost"
+            name="cost"
             className="w-1/4 border rounded px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 flex-1"
             required
           />
@@ -83,9 +95,10 @@ const Quick: React.FC<QuickProps> = ({ onSubmit, isOpen, onClose }) => {
                           type="number"
                           className="w-[70%] border rounded px-3 py-2"
                           value={expense.amount}
-                          onChange={(e) => setAmount(e.target.value)}
+                          onChange={onChange}
                           required
                         />
+
                         <button
                           type="submit"
                           className="bg-blue-500 text-white py-1 px-4 rounded hover:bg-blue-600"
