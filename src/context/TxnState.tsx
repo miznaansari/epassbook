@@ -1,9 +1,7 @@
 import { useState } from "react";
 import TxnContext from "./TxnContext";
 import axios from "axios";
-interface Transaction {
-    amount: { $numberDecimal: string }; // Ensure amount is properly typed
-  }
+
   
 const TxnState: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
