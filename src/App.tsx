@@ -7,7 +7,7 @@ import SectionB from './components/SectionB';
 import SectionC from './components/SectionC';
 import Signup from './components/Signup';
 import AuthState from './context/AuthState';
-import Navbar from "./components/Navbar";
+
 import TxnState from "./context/TxnState";
 import BottomNavbar from "./components/BottomNavbar";
 
