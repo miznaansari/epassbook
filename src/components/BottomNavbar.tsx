@@ -7,9 +7,7 @@ const BottomNavbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [category, setcategory] = useState("")
 
-  const handleSubmit = (expense: { name: string; amount: number }) => {
-    console.log("Added Expense:", expense);
-  };
+  
 
   return (
     <div
@@ -89,7 +87,7 @@ const BottomNavbar: React.FC = () => {
         </Link>
       </div>
 
-      <Quick isOpen={isOpen} onClose={() => setIsOpen(false)} onSubmit={handleSubmit} category={category} />
+      <Quick isOpen={isOpen} onClose={() => setIsOpen(false)} category={category} />
     </div>
   );
 };
