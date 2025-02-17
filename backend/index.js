@@ -14,6 +14,7 @@ app.get('/', (req, res) => {
 
 app.use('/api',require('./route/Createuser'));
 app.use('/api',require('./route/Transaction'));
+app.use('/api',require('./route/Quickaccess'));
 
 
 app.listen(port, () => {

@@ -5,6 +5,7 @@ import Quick from "./Quick";
 const BottomNavbar: React.FC = () => {
   const [showLogout, setShowLogout] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [category, setcategory] = useState("")
 
   const handleSubmit = (expense: { name: string; amount: number }) => {
     console.log("Added Expense:", expense);
@@ -20,21 +21,32 @@ const BottomNavbar: React.FC = () => {
         <button
           onClick={() => {
             setIsOpen(!isOpen);
+            setcategory("food");
           }}
           className="flex flex-col items-center text-gray-600 hover:text-purple-500"
+          
         >
           <i className="fas fa-utensils text-xl"></i>
           <span className="text-xs">Food</span>
         </button>
 
         {/* Travel Button */}
-        <button className="flex flex-col items-center text-gray-600 hover:text-teal-500">
+        <button className="flex flex-col items-center text-gray-600 hover:text-teal-500"
+        onClick={() => {
+          setIsOpen(!isOpen);
+          setcategory("travel");
+        }}
+        >
           <i className="fas fa-plane-departure text-xl"></i>
           <span className="text-xs">Travel</span>
         </button>
 
         {/* Expenses Button */}
-        <button className="flex flex-col items-center text-gray-600 hover:text-teal-500">
+        <button className="flex flex-col items-center text-gray-600 hover:text-teal-500"
+         onClick={() => {
+          setIsOpen(!isOpen);
+          setcategory("expense");
+        }}>
           <i className="fa-solid fa-box text-xl"></i>
           <span className="text-xs">Expenses</span>
         </button>
@@ -77,7 +89,7 @@ const BottomNavbar: React.FC = () => {
         </Link>
       </div>
 
-      <Quick isOpen={isOpen} onClose={() => setIsOpen(false)} onSubmit={handleSubmit} />
+      <Quick isOpen={isOpen} onClose={() => setIsOpen(false)} onSubmit={handleSubmit} category={category} />
     </div>
   );
 };
