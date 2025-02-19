@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import React, { useEffect } from "react";
+import React from "react";
+import { jwtDecode } from "jwt-decode";
 import './App.css';
 import Login from './components/Login';
 import SectionA from './components/SectionA';
@@ -15,58 +16,35 @@ interface RouteProps {
   component: React.ReactElement;
 }
 
-const App: React.FC = () => {
-  useEffect(() => {
-    // Check token expiry on app load
-    const token = localStorage.getItem("token");
-    if (token) {
-      const parsedToken = JSON.parse(token);
-      const expiry = parsedToken?.expiry || 0;
-      if (Date.now() > expiry) {
-        // If token expired, remove it and redirect to login
-        localStorage.removeItem("token");
-      }
-    }
-  }, []);
-
-  return (
-    <AuthState>
-      <TxnState>
-        <Router>
-          {/* <Navbar /> */}
-          <Routes>
-            {/* Public Routes - Redirect to MainSections if already logged in */}
-            <Route path="/login" element={<PublicRoute component={<Login />} />} />
-            <Route path="/signup" element={<PublicRoute component={<Signup />} />} />
-
-            {/* Protected Route - Redirect to login if not authenticated */}
-            <Route path="/*" element={<ProtectedRoute component={<MainSections />} />} />
-          </Routes>
-          <BottomNavbar />
-        </Router>
-      </TxnState>
-    </AuthState>
-  );
-};
+// ✅ Decode JWT Token
+interface DecodedToken {
+  exp: number; // Expiration time
+}
 
 // ✅ ProtectedRoute - Only allow access if user has a valid token
 const ProtectedRoute: React.FC<RouteProps> = ({ component }) => {
   const token = localStorage.getItem("token");
 
-  if (!token) {
-    return <Navigate to="/login" />;
+  if (token) {
+    try {
+      
+      const decoded: DecodedToken = jwtDecode(token);
+      const currentTime = Date.now() / 1000; // Convert to seconds
+      console.log(decoded)
+      if (decoded.exp < currentTime) {
+        localStorage.removeItem("token"); // Remove expired token
+        return <Navigate to="/login" />;
+      }
+
+      return component;
+    } catch (error) {
+      console.error("Invalid token:", error);
+      localStorage.removeItem("token"); // Remove invalid token
+      return <Navigate to="/login" />;
+    }
   }
 
-  // Check token expiry
-  const parsedToken = JSON.parse(token);
-  const expiry = parsedToken?.expiry || 0;
-  if (Date.now() > expiry) {
-    // If expired, remove token and redirect to login
-    localStorage.removeItem("token");
-    return <Navigate to="/login" />;
-  }
-
-  return component;
+  return <Navigate to="/login" />;
 };
 
 // ✅ PublicRoute - Prevent logged-in users from accessing login/signup
@@ -83,6 +61,26 @@ const MainSections: React.FC = () => {
       <SectionB />
       <SectionC />
     </>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <AuthState>
+      <TxnState>
+        <Router>
+          <Routes>
+            {/* Public Routes - Redirect to MainSections if already logged in */}
+            <Route path="/login" element={<PublicRoute component={<Login />} />} />
+            <Route path="/signup" element={<PublicRoute component={<Signup />} />} />
+
+            {/* Protected Route - Redirect to login if not authenticated */}
+            <Route path="/*" element={<ProtectedRoute component={<MainSections />} />} />
+          </Routes>
+          <BottomNavbar />
+        </Router>
+      </TxnState>
+    </AuthState>
   );
 };
 
