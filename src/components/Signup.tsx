@@ -1,6 +1,7 @@
 import { useContext } from "react"
 import AuthContext from "../context/AuthContext";
 import Google from "./Google";
+import { Link } from "react-router-dom";
 
 
 const Signup = () => {

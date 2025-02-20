@@ -6,11 +6,12 @@ import axios from "axios";
 const TxnState: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
     // const [todayamount, settodayamount] = useState<number | null>(null);
-
+//http://localhost:4000
+//https://epassbook.onrender.com
     const user = localStorage.getItem("user");
     const userData = user ? JSON.parse(user) : null;
     const id = userData ? userData._id : "";
-    const url = "https://epassbook.onrender.com";
+    const url = "http://localhost:4000";
     const token = localStorage.getItem('token');
 
     const [txnDetail, setTxnDetail] = useState({
@@ -77,8 +78,33 @@ const TxnState: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     };
 
 
+
+
+    const addquickitemstxn = (id: string, quantity: number) => {
+        const data = {
+            id: id,
+            quantity: quantity  // Changed to 'quantity' to match backend
+        };
+
+       axios.post(`${url}/api/addquickitems`, data, {
+            headers: {
+                'Authorization': token,
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => {
+                console.log(response.data.amount);  // Handle success
+                const amount = response.data.amount +   todayAmount;
+                settodayAmount(amount);
+            
+            })
+            .catch(error => {
+                console.error("Error adding quick item:", error);  // Handle error
+            });
+    }
+
     return (
-        <TxnContext.Provider value={{ txnDetail, setTxnDetail, addtxn, fetchallamount, todayAmount, monthlyAmount }}>
+        <TxnContext.Provider value={{ txnDetail, setTxnDetail, addtxn, fetchallamount, todayAmount, monthlyAmount ,addquickitemstxn}}>
             {children}
         </TxnContext.Provider>
     );

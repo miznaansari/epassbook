@@ -15,25 +15,7 @@ const QuickState: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     }, [quicklist])
 
 
-    const addquickitemstxn = (id: string, quantity: number) => {
-        const data = {
-            id: id,
-            quantity: quantity  // Changed to 'quantity' to match backend
-        };
-
-        axios.post(`${url}/api/addquickitems`, data, {
-            headers: {
-                'Authorization': token,
-                'Content-Type': 'application/json'
-            }
-        })
-            .then(response => {
-                console.log(response.data.message);  // Handle success
-            })
-            .catch(error => {
-                console.error("Error adding quick item:", error);  // Handle error
-            });
-    }
+    
 
 
     const fetchquickitems = async () => {
@@ -63,7 +45,7 @@ const QuickState: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     }
 
     return (
-        <QuickContext.Provider value={{ addquickitems, fetchquickitems, quicklist, addquickitemstxn }}>
+        <QuickContext.Provider value={{ addquickitems, fetchquickitems, quicklist }}>
             {children}
         </QuickContext.Provider>
     );
