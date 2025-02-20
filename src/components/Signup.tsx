@@ -137,9 +137,9 @@ const handlesubmit = (e: React.FormEvent) => {
         {/* Signup Link */}
         <p className="mt-6 text-center text-sm text-gray-600">
           If you have already account?{' '}
-          <a href="/login" className="text-purple-600 font-medium hover:underline">
+          <Link to="/login" className="text-purple-600 font-medium hover:underline">
             Login
-          </a>
+          </Link>
         </p>
       </form>
     </div>
