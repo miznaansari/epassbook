@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 
 const QuickState: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const url = 'https://epassbook.onrender.com"';
+    const url = 'https://epassbook.onrender.com';
     const token = localStorage.getItem('token') || '';
     const [quicklist, setquicklist] = useState<{ _id: string; name: string; cost: string; category: string; }[]>([]);
 
