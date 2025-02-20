@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import './App.css';
 import Login from './components/Login';
@@ -10,6 +10,7 @@ import Signup from './components/Signup';
 import AuthState from './context/AuthState';
 import TxnState from "./context/TxnState";
 import BottomNavbar from "./components/BottomNavbar";
+import QuickState from "./context/QuickState";
 
 // ✅ Define prop types for ProtectedRoute and PublicRoute
 interface RouteProps {
@@ -27,10 +28,9 @@ const ProtectedRoute: React.FC<RouteProps> = ({ component }) => {
 
   if (token) {
     try {
-      
       const decoded: DecodedToken = jwtDecode(token);
       const currentTime = Date.now() / 1000; // Convert to seconds
-      console.log(decoded)
+      console.log(decoded);
       if (decoded.exp < currentTime) {
         localStorage.removeItem("token"); // Remove expired token
         return <Navigate to="/login" />;
@@ -64,11 +64,41 @@ const MainSections: React.FC = () => {
   );
 };
 
+// ✅ Offline Popup Component
+const OfflinePopup: React.FC<{ isOffline: boolean }> = ({ isOffline }) => {
+  if (!isOffline) return null;
+  return (
+    <div className="fixed top-10  bg-red-500 z-50 rounded text-white p-5" >
+      ⚠️ You are offline! Check your internet connection.
+    </div>
+  );
+};
+
 const App: React.FC = () => {
+  const [isOffline, setIsOffline] = useState<boolean>(!navigator.onLine);
+
+  useEffect(() => {
+    // Listen for online/offline status changes
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
   return (
     <AuthState>
       <TxnState>
+      <QuickState>
         <Router>
+          {/* Show Offline Popup */}
+          <OfflinePopup isOffline={isOffline} />
+
           <Routes>
             {/* Public Routes - Redirect to MainSections if already logged in */}
             <Route path="/login" element={<PublicRoute component={<Login />} />} />
@@ -79,6 +109,8 @@ const App: React.FC = () => {
           </Routes>
           <BottomNavbar />
         </Router>
+      </QuickState>
+
       </TxnState>
     </AuthState>
   );
