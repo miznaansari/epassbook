@@ -35,12 +35,7 @@ const Quick: React.FC<QuickProps> = ({ isOpen, onClose, category }) => {
 
   const [quantities, setQuantities] = useState<Quantities>({});
 
-  const handleQuantityChange = (id: string, value: number) => {
-    setQuantities((prev) => ({
-      ...prev,
-      [id]: Math.max(1, (prev[id] || 1) + value), // Ensures quantity is at least 1
-    }));
-  };
+  
 
   // Handle Increment
   useEffect(() => {
