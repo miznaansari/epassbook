@@ -34,7 +34,11 @@ router.post('/addquickitems', authMiddleware, async (req, res) => {
         });
 
         await userTXN.save();
-        res.json({ message: "Quick item added successfully" });
+        res.json({ 
+            messages: "Quick item added successfully", 
+            amount: totalcost 
+          });
+          
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Server error" });

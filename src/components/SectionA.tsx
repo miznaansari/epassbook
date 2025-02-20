@@ -17,6 +17,10 @@ const SectionA = () => {
   const [animatedMonth, setAnimatedMonth] = useState(0);
   const [loading, setLoading] = useState(true);
 
+  // Store the previous values
+  const [prevTodayAmount, setPrevTodayAmount] = useState(0);
+  const [prevMonthlyAmount, setPrevMonthlyAmount] = useState(0);
+
   // Listen for localStorage token changes
   useEffect(() => {
     const handleStorageChange = () => {
@@ -34,30 +38,41 @@ const SectionA = () => {
       fetchallamount();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]); // Removed fetchallamount from dependencies
-  
+  }, [token]);
 
   useEffect(() => {
     if (todayAmount !== null && monthlyAmount !== null) {
       setLoading(false);
 
-      let start = 0;
+      // Animate Today Amount
+      let start = prevTodayAmount;
       const duration = 1000;
-      const step = (todayAmount / duration) * 10;
+      const step = ((todayAmount - start) / duration) * 10;
 
       const interval = setInterval(() => {
         start += step;
-        setAnimatedToday(Math.min(Math.floor(start), todayAmount));
-        if (start >= todayAmount) clearInterval(interval);
+        setAnimatedToday(Math.round(start));
+        if ((step > 0 && start >= todayAmount) || (step < 0 && start <= todayAmount)) {
+          clearInterval(interval);
+          setAnimatedToday(todayAmount);
+        }
       }, 10);
 
-      let startMonth = 0;
-      const stepMonth = (monthlyAmount / duration) * 10;
+      // Animate Monthly Amount
+      let startMonth = prevMonthlyAmount;
+      const stepMonth = ((monthlyAmount - startMonth) / duration) * 10;
       const intervalMonth = setInterval(() => {
         startMonth += stepMonth;
-        setAnimatedMonth(Math.min(Math.floor(startMonth), monthlyAmount));
-        if (startMonth >= monthlyAmount) clearInterval(intervalMonth);
+        setAnimatedMonth(Math.round(startMonth));
+        if ((stepMonth > 0 && startMonth >= monthlyAmount) || (stepMonth < 0 && startMonth <= monthlyAmount)) {
+          clearInterval(intervalMonth);
+          setAnimatedMonth(monthlyAmount);
+        }
       }, 10);
+
+      // Store the current values as previous for next render
+      setPrevTodayAmount(todayAmount);
+      setPrevMonthlyAmount(monthlyAmount);
     }
   }, [todayAmount, monthlyAmount]);
 

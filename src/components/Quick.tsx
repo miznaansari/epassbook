@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import QuickContext from "../context/QuickContext";
+import TxnContext from "../context/TxnContext";
 
 interface QuickProps {
   isOpen: boolean;
@@ -21,21 +22,37 @@ const Quick: React.FC<QuickProps> = ({ isOpen, onClose, category }) => {
     return null;
   }
 
-  const { addquickitems, fetchquickitems, quicklist ,addquickitemstxn} = context;
+  const contexts = useContext(TxnContext);
+  if (!contexts) {
+    console.log("Context not found");
+    return null;
+  }
+  const { addquickitems, fetchquickitems, quicklist,  } = context;
+  const {addquickitemstxn} = contexts;
 
   useEffect(() => {
     fetchquickitems();
   }, []);
 
-  const addtxnquick = (id: string, e: React.FormEvent) => {
-    e.preventDefault();
-    console.log(`Adding ${quantities[id]} units of item with ID: ${id}`);
-    addquickitemstxn(id,quantities[id])
-  };
+  const [addingLoader, setaddingLoader] = useState<{ [key: string]: boolean }>({});
+
+const addtxnquick = async (id: string, e: React.FormEvent) => {
+  e.preventDefault();
+  setaddingLoader((prev) => ({ ...prev, [id]: true }));
+  console.log(`Adding ${quantities[id]} units of item with ID: ${id}`);
+
+  const response = await addquickitemstxn(id, quantities[id]);
+  console.log(response + "sadf");
+
+  setaddingLoader((prev) => ({ ...prev, [id]: false }));
+};
+
+
+  
 
   const [quantities, setQuantities] = useState<Quantities>({});
 
-  
+
 
   // Handle Increment
   useEffect(() => {
@@ -160,7 +177,7 @@ const Quick: React.FC<QuickProps> = ({ isOpen, onClose, category }) => {
                     <td className="py-2 px-4 border text-center text-green-500 text-lg">
                       <form onSubmit={(e) => addtxnquick(quicklistitem._id, e)}>
                         <button type="submit" className="bg-blue-500 text-white px-3 py-1 rounded">
-                          Add
+                        {addingLoader[quicklistitem._id] ? "Adding..." : "Add"}
                         </button>
                       </form>
                     </td>

@@ -5,6 +5,8 @@ interface TxnContextType {
   txnDetail: TxnDetailType;
   setTxnDetail: React.Dispatch<React.SetStateAction<TxnDetailType>>;
   addtxn: () => void;
+  addquickitemstxn: (id: any,quantity: any) => void;
+
   fetchallamount: () => void;
   // todaytxn: () => void;
   todayAmount: number | null; // Ensure it matches useState type
