@@ -1,55 +1,60 @@
-import React, { useEffect, useContext } from "react";
+import React, { useEffect, useContext, useState } from "react";
 import TxnContext from "../context/TxnContext";
 
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   txnType: string;
-  txnStatus: string
+  txnStatus: string;
 }
 
-const UpdateAndDeleteModal: React.FC<ModalProps> = ({ isOpen, onClose, txnType,txnStatus }) => {
-
-  
-  const context = useContext(TxnContext)
+const UpdateAndDeleteModal: React.FC<ModalProps> = ({ isOpen, onClose, txnType, txnStatus }) => {
+  const context = useContext(TxnContext);
   if (!context) {
     console.error("TxnContext is null! Ensure TxnState is wrapping this component.");
     return null;
   }
-  const {txnDetail, setTxnDetail,addtxn} = context;
-  
+  const { txnDetail, setTxnDetail, addtxn } = context;
 
-  // Update transaction_type when txnType prop changes
+  // Error state
+  const [errors, setErrors] = useState<{ amount?: string }>({});
+
+  // Update txnType and txnStatus
   useEffect(() => {
-    setTxnDetail((prev) => ({ ...prev, transaction_type: txnType }));
-    setTxnDetail((prev) => ({ ...prev, transaction_status: txnStatus, }));
-  }, [txnType,txnStatus]);
+    setTxnDetail((prev) => ({ ...prev, transaction_type: txnType, transaction_status: txnStatus }));
+  }, [txnType, txnStatus]);
 
+  // Input change handler
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTxnDetail({ ...txnDetail, [e.target.name]: e.target.value });
-   
+    const { name, value } = e.target;
+    setTxnDetail({ ...txnDetail, [name]: value });
+
+    // Validate amount input
+    if (name === "amount") {
+      if (!/^\d*\.?\d*$/.test(value)) {
+        setErrors((prev) => ({ ...prev, amount: "Amount must be a valid number" }));
+      } else {
+        setErrors((prev) => ({ ...prev, amount: undefined }));
+      }
+    }
   };
 
-
-  
-
+  // Submit handler
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Form submitted", txnDetail);
-    addtxn()
-
+    if (!errors.amount) {
+      console.log("Form submitted", txnDetail);
+      addtxn();
+    }
   };
-
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 flex justify-center items-center bg-[#1e2939ad] bg-opacity-50 z-50">
       <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-        {/* Modal Header */}
         <h2 className="text-xl font-semibold mb-4">Update & Delete TXN</h2>
 
-        {/* Modal Form */}
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
             <label className="block text-sm font-medium text-gray-700">Transaction Spend</label>
@@ -59,7 +64,7 @@ const UpdateAndDeleteModal: React.FC<ModalProps> = ({ isOpen, onClose, txnType,t
               value={txnDetail.transaction_name}
               onChange={handleChange}
               placeholder="Enter Transaction Name"
-              className="w-full border rounded px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500"
               required
             />
           </div>
@@ -72,9 +77,12 @@ const UpdateAndDeleteModal: React.FC<ModalProps> = ({ isOpen, onClose, txnType,t
               value={txnDetail.amount}
               onChange={handleChange}
               placeholder="Enter Transaction Price"
-              className="w-full border rounded px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500"
+              className={`w-full border ${
+                errors.amount ? "border-red-500" : "border-gray-300"
+              } rounded px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500`}
               required
             />
+            {errors.amount && <p className="text-red-500 text-xs mt-1">{errors.amount}</p>}
           </div>
 
           <div>
@@ -85,14 +93,18 @@ const UpdateAndDeleteModal: React.FC<ModalProps> = ({ isOpen, onClose, txnType,t
               value={txnDetail.description}
               onChange={handleChange}
               placeholder="Enter Transaction ID"
-              className="w-full border rounded px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500"
               required
             />
           </div>
 
           {/* Buttons */}
           <div className="flex gap-2">
-            <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 flex-1">
+            <button
+              type="submit"
+              className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 flex-1 disabled:bg-gray-400"
+              disabled={!!errors.amount} // Disable if there's an error
+            >
               Submit
             </button>
             <button type="button" onClick={onClose} className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 flex-1">
