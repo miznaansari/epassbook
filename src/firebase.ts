@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // import { initializeApp } from "firebase/app";
 // import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, User } from "firebase/auth";
 
@@ -16,3 +17,6 @@
 // const app = initializeApp(firebaseConfig);
 // export const auth = getAuth(app);
 // export const provider = new GoogleAuthProvider();
+=======
+
+>>>>>>> 18bbdec5aad44a7674bc9ba614ae0475c74401aa
