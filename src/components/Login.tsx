@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { useNavigate } from "react-router-dom"; // ✅ Import useNavigate
+import { Link, useNavigate } from "react-router-dom"; // ✅ Import useNavigate
 import AuthContext from "../context/AuthContext";
 import Google from "./Google";
 
@@ -94,7 +94,12 @@ const Login = () => {
 
             Login
           </button>
-          
+          <p className="text-sm text-center w-full text-gray-600 mt-4">
+      Don't have an account?{" "}
+      <Link to="/signup" className="text-purple-600 font-medium hover:underline">
+        Create one
+      </Link>
+    </p>
         </div>
       </form>
     </div>
