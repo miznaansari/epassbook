@@ -11,7 +11,7 @@ const TxnState: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const user = localStorage.getItem("user");
     const userData = user ? JSON.parse(user) : null;
     const id = userData ? userData._id : "";
-    const url = "http://localhost:4000";
+    const url = "https://epassbook.onrender.com";
     const token = localStorage.getItem('token');
 
     const [txnDetail, setTxnDetail] = useState({
