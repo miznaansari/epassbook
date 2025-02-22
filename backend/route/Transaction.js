@@ -59,13 +59,104 @@ router.post("/fetchamount", authMiddleware, async (req, res) => {
             getAmount(startOfYearUTC, endOfYearUTC),
         ]);
 
-        res.json({ todayAmount, yesterdayAmount, monthlyAmount, yearlyAmount });
+         // Use $facet to perform both aggregations in one request
+         const result = await UserTransaction.aggregate([
+            { 
+                $match: { 
+                    user_id: userObjectId, 
+                    transaction_type: { $in: ['loan', 'lending'] }
+                } 
+            },
+            {
+                $facet: {
+                    loanSum: [
+                        { $match: { transaction_type: 'loan' } },
+                        { 
+                            $group: { 
+                                _id: null, 
+                                totalAmount: { $sum: { $toDecimal: "$amount" } } 
+                            } 
+                        }
+                    ],
+                    lendingSum: [
+                        { $match: { transaction_type: 'lending' } },
+                        { 
+                            $group: { 
+                                _id: null, 
+                                totalAmount: { $sum: { $toDecimal: "$amount" } } 
+                            } 
+                        }
+                    ]
+                }
+            }
+        ]);
+
+        // Extract the totals or default to "0"
+        const total_loan_amount = result[0]?.loanSum[0]?.totalAmount?.toString() || "0";
+        const total_lending_amount = result[0]?.lendingSum[0]?.totalAmount?.toString() || "0";
+
+
+        res.json({ todayAmount, yesterdayAmount, monthlyAmount, yearlyAmount ,total_loan_amount,total_lending_amount });
 
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
+router.post('/fetchtxnLL', authMiddleware, async (req, res) => {
+    try {
+        // Convert user_id to ObjectId
+        const userObjectId = new mongoose.Types.ObjectId(req.user.id);
+
+        // Use $facet to perform both aggregations in one request
+        const result = await UserTransaction.aggregate([
+            { 
+                $match: { 
+                    user_id: userObjectId, 
+                    transaction_type: { $in: ['loan', 'lending'] }
+                } 
+            },
+            {
+                $facet: {
+                    loanSum: [
+                        { $match: { transaction_type: 'loan' } },
+                        { 
+                            $group: { 
+                                _id: null, 
+                                totalAmount: { $sum: { $toDecimal: "$amount" } } 
+                            } 
+                        }
+                    ],
+                    lendingSum: [
+                        { $match: { transaction_type: 'lending' } },
+                        { 
+                            $group: { 
+                                _id: null, 
+                                totalAmount: { $sum: { $toDecimal: "$amount" } } 
+                            } 
+                        }
+                    ]
+                }
+            }
+        ]);
+
+        // Extract the totals or default to "0"
+        const total_loan_amount = result[0]?.loanSum[0]?.totalAmount?.toString() || "0";
+        const total_lending_amount = result[0]?.lendingSum[0]?.totalAmount?.toString() || "0";
+
+        res.status(200).json({
+            total_loan_amount,
+            total_lending_amount
+        });
+    } catch (error) {
+        console.error("Error fetching transactions:", error);
+        res.status(500).json({ error: "Server error while fetching transactions" });
+    }
+});
+
+
+
 
 
 

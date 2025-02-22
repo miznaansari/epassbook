@@ -43,7 +43,7 @@ const BottomNavbar: React.FC = () => {
         <button className="flex flex-col items-center text-gray-600 hover:text-teal-500"
          onClick={() => {
           setIsOpen(!isOpen);
-          setcategory("expense");
+          setcategory("expenses");
         }}>
           <i className="fa-solid fa-box text-xl"></i>
           <span className="text-xs">Expenses</span>

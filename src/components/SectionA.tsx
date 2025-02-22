@@ -11,7 +11,7 @@ const SectionA = () => {
     return null;
   }
 
-  const { fetchallamount, todayAmount, monthlyAmount } = context;
+  const { fetchallamount, todayAmount, monthlyAmount ,loanAmount,lendingAmount } = context;
 
   const [animatedToday, setAnimatedToday] = useState(0);
   const [animatedMonth, setAnimatedMonth] = useState(0);
@@ -132,7 +132,7 @@ const SectionA = () => {
             <i className="fas fa-file-invoice text-3xl"></i>
             <div className="ml-4">
               <h2 className="text-sm font-semibold">Total Loan</h2>
-              <p className="text-xl font-bold" id="total_loan">₹5000</p>
+              <p className="text-xl font-bold" id="total_loan">₹{loanAmount}</p>
             </div>
           </div>
         </div>
@@ -142,7 +142,7 @@ const SectionA = () => {
             <i className="fas fa-hand-holding-usd text-3xl"></i>
             <div className="ml-4">
               <h2 className="text-sm font-semibold">Total Lending</h2>
-              <p className="text-xl font-bold" id="total_lending_amount">₹3000</p>
+              <p className="text-xl font-bold" id="total_lending_amount">₹{lendingAmount}</p>
             </div>
           </div>
         </div>
