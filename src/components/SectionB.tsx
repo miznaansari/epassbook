@@ -25,7 +25,7 @@ const SectionB = () => {
 
       {/* Add Loan Button */}
       <button
-        onClick={() => openModal("loan","pending")}
+        onClick={() => openModal("loan","loan_pending")}
         className="bg-red-500 text-white p-3 rounded-lg shadow-md hover:bg-red-600 flex items-center text-xs space-x-2"
       >
         <i className="fas fa-file-invoice text-sm"></i>

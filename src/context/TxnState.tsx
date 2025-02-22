@@ -24,9 +24,14 @@ const TxnState: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     });
 
     const [todayAmount, settodayAmount] = useState<number>(0);
+    const [loanAmount, setloanAmount] = useState<number>(0);
+    const [lendingAmount, setlendingAmount] = useState<number>(0);
 
 
     const [monthlyAmount, setmonthlyAmount] = useState<number | null>(null);
+
+    
+
 
     const addtxn = async () => {
         try {
@@ -45,6 +50,14 @@ const TxnState: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             console.log(txnDetail.amount)
             const a = parseFloat(txnDetail.amount) + todayAmount
             settodayAmount(a);
+             // Vibration
+             if (navigator.vibrate) {
+                navigator.vibrate([200, 100, 200]); // Pattern: Vibrate, Pause, Vibrate
+            }
+
+            // Play Success Sound
+            const successSound = new Audio('https://dl.prokerala.com/downloads/ringtones/files/mp3/success-level-52186.mp3');
+            successSound.play();
 
         } catch (error) {
             console.error("Error adding transaction:", error);
@@ -68,8 +81,12 @@ const TxnState: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     },
                 }
             );
+
+
             console.log("asdfsd" + token);
             console.log(response.data);
+            setloanAmount(response.data.total_loan_amount)
+            setlendingAmount(response.data.total_lending_amount)
             settodayAmount(response.data.todayAmount);
             setmonthlyAmount(response.data.monthlyAmount);
         } catch (error) {
@@ -104,7 +121,7 @@ const TxnState: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     }
 
     return (
-        <TxnContext.Provider value={{ txnDetail, setTxnDetail, addtxn, fetchallamount, todayAmount, monthlyAmount ,addquickitemstxn}}>
+        <TxnContext.Provider value={{ txnDetail, setTxnDetail, addtxn, fetchallamount,loanAmount,lendingAmount, todayAmount, monthlyAmount ,addquickitemstxn}}>
             {children}
         </TxnContext.Provider>
     );

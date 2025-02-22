@@ -11,6 +11,8 @@ interface TxnContextType {
   // todaytxn: () => void;
   todayAmount: number | null; // Ensure it matches useState type
   monthlyAmount: number | null; // Ensure it matches useState type
+  loanAmount: number | null; // Ensure it matches useState type
+  lendingAmount: number | null; // Ensure it matches useState type
   // settodayamount: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
