@@ -3,22 +3,24 @@ import { motion, AnimatePresence } from "framer-motion";
 import TxnContext from "../context/TxnContext";
 
 interface Transaction {
-  id: number;
-  description: string;
-  transaction_type: "all" | "loan" | "lending";
+  id: string;  // MongoDB _id is a string
+  transaction_type: string;  // Allow any value from API
   transaction_name: string;
   amount: number;
   transaction_status: string;
   created_at: string;
+  description?: string;
 }
 
 interface ModalProps {
-  singleTransaction?: Transaction;
+  singleTransaction: Transaction | null;
   isOpen: boolean;
   onClose: () => void;
 }
 
+
 const EditableModal: React.FC<ModalProps> = ({ singleTransaction, isOpen, onClose }) => {
+   if (!singleTransaction) return null; 
   const context = useContext(TxnContext);
   if (!context) {
     throw new Error("TxnContext must be used within a provider");
@@ -26,7 +28,11 @@ const EditableModal: React.FC<ModalProps> = ({ singleTransaction, isOpen, onClos
 
   const { deletetxn, edittxn } = context;
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState<Transaction | null>(singleTransaction || null);
+  const [formData, setFormData] = useState(singleTransaction || {});
+
+  
+
+
   const [errors, setErrors] = useState<{ amount?: string }>({});
   const [loading, setLoading] = useState(false);
 
@@ -51,11 +57,13 @@ const EditableModal: React.FC<ModalProps> = ({ singleTransaction, isOpen, onClos
       setErrors((prev) => ({ ...prev, amount: undefined }));
     }
   };
+  
 
   const handleSave = async () => {
     if (!formData || !singleTransaction) return;
     setLoading(true);
-    await edittxn(singleTransaction.id, formData);
+    
+    await edittxn(singleTransaction.id.toString(), formData);
     setIsEditing(false);
     setLoading(false);
   };
@@ -63,7 +71,7 @@ const EditableModal: React.FC<ModalProps> = ({ singleTransaction, isOpen, onClos
   const handleDelete = async () => {
     if (!singleTransaction) return;
     setLoading(true);
-    await deletetxn(singleTransaction.id);
+    await deletetxn(singleTransaction.id.toString());
     setLoading(false);
     onClose(); // Close modal after deletion
   };
