@@ -4,9 +4,11 @@ import EditableModal from "./EditableModal"; // Import the modal component
 
 
 
+
+
 interface Transaction {
-  id: number;
-  transaction_type: "all" | "loan" | "lending";
+  id: string;  // MongoDB _id is a string
+  transaction_type: string;  // Allow any value from API
   transaction_name: string;
   amount: number;
   transaction_status: string;
@@ -17,7 +19,15 @@ interface Transaction {
 const SectionC: React.FC = () => {
   const [alltxn, setAllTxn] = useState<Transaction[]>([]);
   const [filter, setFilter] = useState<string>("all");
-  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction>({
+    id: "",
+    transaction_type: "",
+    transaction_name: "",
+    amount: 0,
+    transaction_status: "",
+    created_at: "",
+  });
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const token = localStorage.getItem("token");
 
@@ -28,21 +38,23 @@ const SectionC: React.FC = () => {
         { filter: "monthly" },
         {
           headers: {
-            Authorization: token,
+            Authorization: token || "", // Ensure token is never null
             "Content-Type": "application/json",
           },
         }
       );
 
-      // Transform API data safely
+      // Safely transform API data
       const formattedData: Transaction[] = response.data.transactions.map((txn: any) => ({
-        id: txn._id, // Convert `_id` to `id`
-        transaction_type: txn.transaction_type,
-        transaction_name: txn.transaction_name,
-        amount: txn.amount ? parseFloat(txn.amount.$numberDecimal || txn.amount) : 0,
-        transaction_status: txn.transaction_status,
-        created_at: txn.createdAt,
-        description: txn.description, // Add description
+        id: String(txn._id), // Ensure id is always a string
+        transaction_type: txn.transaction_type || "unknown", // Handle missing type
+        transaction_name: txn.transaction_name || "Unnamed",
+        amount: typeof txn.amount === "object" 
+          ? parseFloat(txn.amount.$numberDecimal || "0") 
+          : parseFloat(txn.amount || "0"),
+        transaction_status: txn.transaction_status || "unknown",
+        created_at: txn.createdAt || new Date().toISOString(),
+        description: txn.description || "", // Ensure description is always a string
       }));
 
       setAllTxn(formattedData);
@@ -60,14 +72,14 @@ const SectionC: React.FC = () => {
   );
 
   const viewAllDetail = (transaction: Transaction) => {
-    console.log(transaction)
     setSelectedTransaction(transaction);
     setIsModalOpen(true);
   };
 
   return (
     <div>
-      <div className="flex gap-2 justify-around mt-4 mx-2 tablefilterbtn">
+      {/* Filter Buttons */}
+      <div className="flex gap-2 justify-around mt-4 mx-2">
         {["all", "loan", "lending"].map((type) => (
           <button
             key={type}
@@ -81,7 +93,8 @@ const SectionC: React.FC = () => {
         ))}
       </div>
 
-      <table className="mt-4 w-full text-sm text-left text-gray-700 bg-white rounded-lg shadow-md overflow-hidden">
+      {/* Transactions Table */}
+      <table className="mt-4 w-full text-sm text-left text-gray-700 bg-white rounded-lg shadow-md">
         <thead className="bg-gray-100 text-gray-900 text-xs font-semibold uppercase tracking-wider">
           <tr>
             <th className="py-4 px-4 text-[10px]">Txn ID / Type</th>
@@ -95,11 +108,11 @@ const SectionC: React.FC = () => {
             filteredTransactions.map((transaction) => (
               <tr
                 key={transaction.id}
-                className="hover:bg-gray-50 cursor-pointer transaction-row"
+                className="hover:bg-gray-50 cursor-pointer"
                 onClick={() => viewAllDetail(transaction)}
               >
                 <td className="py-4 px-4 text-[11px]">
-                  {`...${transaction.id.toString().slice(-4)}`} / {transaction.transaction_type}
+                  {`...${transaction.id.slice(-4)}`} / {transaction.transaction_type}
                 </td>
                 <td className="py-4 px-4">{transaction.transaction_name}</td>
                 <td className="py-4 px-4">{transaction.amount.toFixed(2)}</td>
@@ -150,16 +163,15 @@ const SectionC: React.FC = () => {
         </tbody>
       </table>
 
-      {/* Render EditableModal when a transaction is selected */}
+      {/* Editable Modal */}
       {isModalOpen && selectedTransaction && (
-  <EditableModal
-  singleTransaction={selectedTransaction || {}}
-    isOpen={isModalOpen}
-    onClose={() => setIsModalOpen(false)}
-    
-  />
-)}
-
+        <EditableModal
+        singleTransaction={selectedTransaction }
+        
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
     </div>
   );
 };

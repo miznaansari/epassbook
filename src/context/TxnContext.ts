@@ -1,6 +1,13 @@
 import { createContext } from "react";
 
 // Define the type for transactions
+interface TransactionData {
+  transaction_name: string;
+  amount: number;
+
+  description: string;
+}
+
 interface TxnContextType {
   txnDetail: TxnDetailType;
   setTxnDetail: React.Dispatch<React.SetStateAction<TxnDetailType>>;
@@ -18,11 +25,6 @@ interface TxnContextType {
   // settodayamount: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
-interface TransactionData {
-  amount: number;
-  transaction_name: string;
-  description: string;
-}
 
 
 // Define the initial transaction structure
