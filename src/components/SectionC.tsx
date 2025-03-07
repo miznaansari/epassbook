@@ -1,5 +1,8 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import EditableModal from "./EditableModal"; // Import the modal component
+
+
 
 interface Transaction {
   id: number;
@@ -8,11 +11,14 @@ interface Transaction {
   amount: number;
   transaction_status: string;
   created_at: string;
+  description?: string;
 }
 
 const SectionC: React.FC = () => {
   const [alltxn, setAllTxn] = useState<Transaction[]>([]);
   const [filter, setFilter] = useState<string>("all");
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const token = localStorage.getItem("token");
 
   const fetchTxn = async () => {
@@ -29,16 +35,15 @@ const SectionC: React.FC = () => {
       );
 
       // Transform API data safely
-      const formattedData: Transaction[] = response.data.transactions.map(
-        (txn: any) => ({
-          id: txn._id, // Convert `_id` to `id`
-          transaction_type: txn.transaction_type,
-          transaction_name: txn.transaction_name,
-          amount: txn.amount ? parseFloat(txn.amount.$numberDecimal || txn.amount) : 0, // Safely parse amount
-          transaction_status: txn.transaction_status,
-          created_at: txn.createdAt, // Rename `createdAt` to `created_at`
-        })
-      );
+      const formattedData: Transaction[] = response.data.transactions.map((txn: any) => ({
+        id: txn._id, // Convert `_id` to `id`
+        transaction_type: txn.transaction_type,
+        transaction_name: txn.transaction_name,
+        amount: txn.amount ? parseFloat(txn.amount.$numberDecimal || txn.amount) : 0,
+        transaction_status: txn.transaction_status,
+        created_at: txn.createdAt,
+        description: txn.description, // Add description
+      }));
 
       setAllTxn(formattedData);
     } catch (error) {
@@ -54,8 +59,14 @@ const SectionC: React.FC = () => {
     (transaction) => filter === "all" || transaction.transaction_type === filter
   );
 
+  const viewAllDetail = (transaction: Transaction) => {
+    console.log(transaction)
+    setSelectedTransaction(transaction);
+    setIsModalOpen(true);
+  };
+
   return (
-    <div >
+    <div>
       <div className="flex gap-2 justify-around mt-4 mx-2 tablefilterbtn">
         {["all", "loan", "lending"].map((type) => (
           <button
@@ -84,12 +95,12 @@ const SectionC: React.FC = () => {
             filteredTransactions.map((transaction) => (
               <tr
                 key={transaction.id}
-                className="hover:bg-gray-50 transaction-row"
+                className="hover:bg-gray-50 cursor-pointer transaction-row"
+                onClick={() => viewAllDetail(transaction)}
               >
                 <td className="py-4 px-4 text-[11px]">
-  {`...${transaction.id.toString().slice(-4)}`} / {transaction.transaction_type}
-</td>
-
+                  {`...${transaction.id.toString().slice(-4)}`} / {transaction.transaction_type}
+                </td>
                 <td className="py-4 px-4">{transaction.transaction_name}</td>
                 <td className="py-4 px-4">{transaction.amount.toFixed(2)}</td>
                 <td className="py-4 px-4 text-center">
@@ -120,14 +131,11 @@ const SectionC: React.FC = () => {
                   )}
                   <br />
                   <p className="text-[10px]">
-                    {new Date(transaction.created_at).toLocaleDateString(
-                      "en-GB",
-                      {
-                        day: "2-digit",
-                        month: "short",
-                        year: "2-digit",
-                      }
-                    )}
+                    {new Date(transaction.created_at).toLocaleDateString("en-GB", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "2-digit",
+                    })}
                   </p>
                 </td>
               </tr>
@@ -141,6 +149,17 @@ const SectionC: React.FC = () => {
           )}
         </tbody>
       </table>
+
+      {/* Render EditableModal when a transaction is selected */}
+      {isModalOpen && selectedTransaction && (
+  <EditableModal
+  singleTransaction={selectedTransaction || {}}
+    isOpen={isModalOpen}
+    onClose={() => setIsModalOpen(false)}
+    
+  />
+)}
+
     </div>
   );
 };
