@@ -11,6 +11,13 @@ interface Transaction {
   created_at: string;
   description?: string;
 }
+interface TransactionData {
+  transaction_name: string;
+  amount: number;
+
+  description: string;
+}
+
 
 interface ModalProps {
   singleTransaction: Transaction | null;
@@ -62,11 +69,19 @@ const EditableModal: React.FC<ModalProps> = ({ singleTransaction, isOpen, onClos
   const handleSave = async () => {
     if (!formData || !singleTransaction) return;
     setLoading(true);
-    
-    await edittxn(singleTransaction.id.toString(), formData);
+  
+    // Ensure only the required fields are passed
+    const formattedData: TransactionData = {
+      transaction_name: formData.transaction_name,
+      amount: formData.amount,
+      description: formData.description || ""  // Ensure non-null value
+    };
+  
+    await edittxn(singleTransaction.id.toString(), formattedData);
     setIsEditing(false);
     setLoading(false);
   };
+  
 
   const handleDelete = async () => {
     if (!singleTransaction) return;
