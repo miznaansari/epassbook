@@ -5,6 +5,8 @@ interface TxnContextType {
   txnDetail: TxnDetailType;
   setTxnDetail: React.Dispatch<React.SetStateAction<TxnDetailType>>;
   addtxn: () => void;
+  edittxn: (id: string, formdata: TransactionData) => void;
+  deletetxn: (id: string) => void;
   addquickitemstxn: (id: any,quantity: any) => void;
 
   fetchallamount: () => void;
@@ -14,6 +16,12 @@ interface TxnContextType {
   loanAmount: number | null; // Ensure it matches useState type
   lendingAmount: number | null; // Ensure it matches useState type
   // settodayamount: React.Dispatch<React.SetStateAction<number | null>>;
+}
+
+interface TransactionData {
+  amount: number;
+  transaction_name: string;
+  description: string;
 }
 
 

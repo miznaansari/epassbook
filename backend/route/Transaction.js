@@ -5,6 +5,63 @@ const authMiddleware = require('../middleware/auth'); // Import JWT middleware
 
 const mongoose = require("mongoose");
 
+    router.put('/edittxn', authMiddleware, async (req, res) => {
+    try {
+        const txnId = req.query.id;
+        const userId = req.user.id;
+        const { amount, transaction_name, description } = req.body;
+
+        if (!txnId) {
+            return res.status(400).json({ error: "Transaction ID is required" });
+        }
+
+        const txn = await UserTransaction.findById(txnId);
+
+        if (!txn) {
+            return res.status(404).json({ error: "Transaction not found" });
+            }
+
+        if (txn.user_id.toString() !== userId) {
+            return res.status(403).json({ error: "Unauthorized to edit this transaction" });
+        }
+
+        if (amount) txn.amount = amount;
+        if (transaction_name) txn.transaction_name = transaction_name;
+        if (description) txn.description = description;
+
+        await txn.save();
+        res.status(200).json({ message: "Transaction edited successfully", transaction: txn });
+    } catch (error) {
+        console.error("Error editing transaction:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+
+router.delete('/deletetxn', authMiddleware, async (req, res) => {
+    try {
+        const txnId = req.query.id;
+        const userId = req.user.id;
+console.log(txnId);
+        const txn = await UserTransaction.findById(txnId);
+
+        if (!txn) {
+            return res.status(404).json({ error: "Transaction not found" });
+        }
+
+        if (txn.user_id.toString() !== userId) {
+            return res.status(403).json({ error: "Unauthorized to delete this transaction" });
+        }
+
+        await UserTransaction.findByIdAndDelete(txnId);
+        res.status(200).json({ message: "Transaction deleted successfully" });
+    } catch (error) {
+        console.error("Error deleting transaction:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+
 router.post("/fetchamount", authMiddleware, async (req, res) => {
     try {
         const userId = req.user.id; 

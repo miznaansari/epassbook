@@ -2,12 +2,16 @@ import { useState } from "react";
 import TxnContext from "./TxnContext";
 import axios from "axios";
 
-
+interface TransactionData {
+    amount: number;
+    transaction_name: string;
+    description: string;
+  }
 const TxnState: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
     // const [todayamount, settodayamount] = useState<number | null>(null);
-//http://localhost:4000
-//https://epassbook.onrender.com
+    //http://localhost:4000
+    //https://epassbook.onrender.com
     const user = localStorage.getItem("user");
     const userData = user ? JSON.parse(user) : null;
     const id = userData ? userData._id : "";
@@ -30,7 +34,7 @@ const TxnState: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
     const [monthlyAmount, setmonthlyAmount] = useState<number | null>(null);
 
-    
+
 
 
     const addtxn = async () => {
@@ -47,12 +51,17 @@ const TxnState: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             );
             response.data
             // console.log(response.data); // Handle the response
-            console.log(txnDetail.amount)
+            console.log(txnDetail)
+
             const a = parseFloat(txnDetail.amount) + todayAmount
             settodayAmount(a);
-             // Vibration
-             if (navigator.vibrate) {
+            // Vibration
+            if (navigator.vibrate) {
                 navigator.vibrate([200, 100, 200]); // Pattern: Vibrate, Pause, Vibrate
+            }
+
+            if (txnDetail.transaction_type === "spend") {
+
             }
 
             // Play Success Sound
@@ -103,7 +112,7 @@ const TxnState: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             quantity: quantity  // Changed to 'quantity' to match backend
         };
 
-       axios.post(`${url}/api/addquickitems`, data, {
+        axios.post(`${url}/api/addquickitems`, data, {
             headers: {
                 'Authorization': token,
                 'Content-Type': 'application/json'
@@ -111,17 +120,45 @@ const TxnState: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         })
             .then(response => {
                 console.log(response.data.amount);  // Handle success
-                const amount = response.data.amount +   todayAmount;
+                const amount = response.data.amount + todayAmount;
                 settodayAmount(amount);
-            
+
             })
             .catch(error => {
                 console.error("Error adding quick item:", error);  // Handle error
             });
     }
 
+    const deletetxn =(id: string,)=>{
+      axios.delete("http://localhost:4000/api/deletetxn", {
+            params: { id: id },
+            headers: { Authorization: token },
+          })
+
+    }
+
+    const edittxn = async (id: string,formdata: TransactionData) => {
+        try {
+             await axios.put("http://localhost:4000/api/edittxn", 
+                {
+                    amount: formdata.amount,
+                    transaction_name: formdata.transaction_name,
+                    description: formdata.description
+                },
+                {
+                    params: { id: id },
+                    headers: { Authorization: token }
+                }
+            );
+            console.log(formdata); // Log response for debugging
+        } catch (error) {
+            console.error("Error updating transaction:", error);
+        }
+    };
+    
+
     return (
-        <TxnContext.Provider value={{ txnDetail, setTxnDetail, addtxn, fetchallamount,loanAmount,lendingAmount, todayAmount, monthlyAmount ,addquickitemstxn}}>
+        <TxnContext.Provider value={{ txnDetail, setTxnDetail, addtxn, fetchallamount,deletetxn,edittxn, loanAmount, lendingAmount, todayAmount, monthlyAmount, addquickitemstxn }}>
             {children}
         </TxnContext.Provider>
     );
