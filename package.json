@@ -15,11 +15,7 @@
     "@tailwindcss/vite": "^4.0.6",
     "axios": "^1.7.9",
     "cors": "^2.8.5",
-<<<<<<< HEAD
     "firebase": "^11.4.0",
-=======
-    "firebase": "^11.3.1",
->>>>>>> 99adb2a3d88269bb6e59619a1e09843c58bc4f59
     "framer-motion": "^12.4.3",
     "jwt-decode": "^4.0.0",
     "react": "^19.0.0",
