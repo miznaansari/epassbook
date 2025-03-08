@@ -16,11 +16,9 @@ router.post('/addquickitems', authMiddleware, async (req, res) => {
         if (!response) {
             return res.status(404).json({ message: "Item not found" });
         }
-        console.log(response)
 
         // // Calculate total cost
         const totalcost = response.cost * quantity;
-        console.log(totalcost)
 
         // // Create new QuickAccess item
         const userTXN = new UserTransaction({
