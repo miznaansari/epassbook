@@ -26,6 +26,7 @@ app.post('/api/auth/google', async (req, res) => {
         // Verify Firebase ID Token
         const decodedToken = await admin.auth().verifyIdToken(idToken);
         const { email, name } = decodedToken;
+console.log(email)
 
         // Check if the user exists in MongoDB
         let user = await User.findOne({ email });
@@ -35,9 +36,8 @@ app.post('/api/auth/google', async (req, res) => {
             user = new User({ name, email, password: '', dob: new Date() }); // DOB can be updated later
             await user.save();
         }
-
         // Generate JWT token for session
-        const jwtToken = jwt.sign({ userId: user._id }, "your_secret_key", { expiresIn: '1h' });
+        const jwtToken = jwt.sign({ id: user._id }, "your_secret_key", { expiresIn: '1h' });
 
         res.json({ success: true, token: jwtToken, user });
     } catch (error) {
