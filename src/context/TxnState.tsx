@@ -130,7 +130,7 @@ const TxnState: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     }
 
     const deletetxn =(id: string,)=>{
-      axios.delete("http://localhost:4000/api/deletetxn", {
+      axios.delete(`${url}/api/deletetxn`, {
             params: { id: id },
             headers: { Authorization: token },
           })
@@ -139,7 +139,7 @@ const TxnState: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
     const edittxn = async (id: string,formdata: TransactionData) => {
         try {
-             await axios.put("http://localhost:4000/api/edittxn", 
+             await axios.put(`${url}/api/edittxn`, 
                 {
                     amount: formdata.amount,
                     transaction_name: formdata.transaction_name,
