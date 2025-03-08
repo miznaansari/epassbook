@@ -19,6 +19,7 @@ const QuickState: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 
     const fetchquickitems = async () => {
+        const token = localStorage.getItem('token');
         const response = await axios.post(`${url}/api/fetchquickitems`, {}, {
             headers: {
                 'Content-Type': 'application/json',

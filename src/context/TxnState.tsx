@@ -74,6 +74,7 @@ const TxnState: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     };
 
     const fetchallamount = async () => {
+        const token = localStorage.getItem('token');
         if (!token) {
             console.error("Token is missing!" + token);
             return;
@@ -111,6 +112,7 @@ const TxnState: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             id: id,
             quantity: quantity  // Changed to 'quantity' to match backend
         };
+        const token = localStorage.getItem('token');
 
         axios.post(`${url}/api/addquickitems`, data, {
             headers: {

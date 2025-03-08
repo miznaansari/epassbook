@@ -1,16 +1,21 @@
 import { useContext, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import TxnContext from "../context/TxnContext";
+import QuickContext from "../context/QuickContext";
 
 const SectionA = () => {
   const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
   const context = useContext(TxnContext);
-
+  const context1 = useContext(QuickContext);
+  if (!context1) {
+    console.error("TxnContext is null! Ensure TxnState is wrapping this component.");
+    return null;
+  }
   if (!context) {
     console.error("TxnContext is null! Ensure TxnState is wrapping this component.");
     return null;
   }
-
+  const { fetchquickitems} = context1;
   const { fetchallamount, todayAmount, monthlyAmount ,loanAmount,lendingAmount } = context;
 
   const [animatedToday, setAnimatedToday] = useState(0);
@@ -36,6 +41,8 @@ const SectionA = () => {
   useEffect(() => {
     if (token) {
       fetchallamount();
+      fetchquickitems();
+      console.log("now fetching the amount ")
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
