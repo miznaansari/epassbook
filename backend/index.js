@@ -48,17 +48,12 @@ app.post('/api/auth/google', async (req, res) => {
 
 // ✅ Basic Route
 app.get('/', (req, res) => {
-<<<<<<< HEAD
-    res.send('Hello World!');
-});
-=======
   res.send('Hello World!')
 })
 
 app.use('/api',require('./route/Createuser'));
 app.use('/api',require('./route/Transaction'));
 app.use('/api',require('./route/Quickaccess'));
->>>>>>> 99adb2a3d88269bb6e59619a1e09843c58bc4f59
 
 // ✅ API Routes
 app.use('/api/user', require('./route/Createuser'));

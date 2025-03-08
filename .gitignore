@@ -31,8 +31,4 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-<<<<<<< HEAD
 backend/firebase-admin.json
-=======
-backend/firebase-admin.json
->>>>>>> 99adb2a3d88269bb6e59619a1e09843c58bc4f59
