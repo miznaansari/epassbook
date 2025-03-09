@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Quick from "./Quick";
 import { FaUtensils, FaPlaneDeparture, FaBox, FaEllipsisH } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
