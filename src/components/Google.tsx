@@ -15,7 +15,7 @@ const Google = () => {
       const photoUrl =  result.user.photoURL; // 🔥 Get Firebase ID Token
 
       // Send the ID token to the backend for verification
-      const response = await fetch("http://localhost:4000/api/auth/google", {
+      const response = await fetch("https://epassbook.onrender.com/api/auth/google", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
