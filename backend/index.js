@@ -20,19 +20,19 @@ app.use(express.json());
 
 // ✅ Google Sign-In Route
 app.post('/api/auth/google', async (req, res) => {
-    const { idToken } = req.body;
+    const { idToken ,photoUrl} = req.body;
 
     try {
         // Verify Firebase ID Token
         const decodedToken = await admin.auth().verifyIdToken(idToken);
         const { email, name } = decodedToken;
-
+      console.log(photoUrl)
         // Check if the user exists in MongoDB
         let user = await User.findOne({ email });
 
         if (!user) {
             // If user does not exist, create a new user
-            user = new User({ name, email, password: '', dob: new Date() }); // DOB can be updated later
+            user = new User({ name, email, password: '', dob: new Date(),profilePicture:photoUrl }); // DOB can be updated later
             await user.save();
         }
         // Generate JWT token for session

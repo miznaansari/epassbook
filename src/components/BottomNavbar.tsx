@@ -1,92 +1,81 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Quick from "./Quick";
+import { FaUtensils, FaPlaneDeparture, FaBox, FaEllipsisH } from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
 
 const BottomNavbar: React.FC = () => {
   const [showLogout, setShowLogout] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [category, setcategory] = useState("")
+  const [category, setCategory] = useState("");
+  const navigate = useNavigate();
 
-  
+  const handleCategoryClick = (cat: string) => {
+    setIsOpen(true);
+    setCategory(cat);
+  };
 
   return (
-    <div
-      className="fixed bottom-0 left-0 right-0 bg-white shadow-lg z-50"
-      style={{ boxShadow: "2px 1px 5px black" }}
-    >
+    <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg z-50 border-t border-gray-300">
       <div className="flex justify-around py-3">
-        {/* Food Button */}
-        <button
-          onClick={() => {
-            setIsOpen(!isOpen);
-            setcategory("food");
-          }}
-          className="flex flex-col items-center text-gray-600 hover:text-purple-500"
-          
-        >
-          <i className="fas fa-utensils text-xl"></i>
-          <span className="text-xs">Food</span>
-        </button>
+        {[
+          { icon: <FaUtensils />, label: "Food", category: "food" },
+          { icon: <FaPlaneDeparture />, label: "Travel", category: "travel" },
+          { icon: <FaBox />, label: "Expenses", category: "expenses" },
+        ].map(({ icon, label, category }) => (
+          <button
+            key={label}
+            onClick={() => handleCategoryClick(category)}
+            className="flex flex-col items-center text-gray-600 hover:text-purple-600 transition-all duration-200"
+          >
+            <div className="text-xl">{icon}</div>
+            <span className="text-xs font-medium">{label}</span>
+          </button>
+        ))}
 
-        {/* Travel Button */}
-        <button className="flex flex-col items-center text-gray-600 hover:text-teal-500"
-        onClick={() => {
-          setIsOpen(!isOpen);
-          setcategory("travel");
-        }}
-        >
-          <i className="fas fa-plane-departure text-xl"></i>
-          <span className="text-xs">Travel</span>
-        </button>
-
-        {/* Expenses Button */}
-        <button className="flex flex-col items-center text-gray-600 hover:text-teal-500"
-         onClick={() => {
-          setIsOpen(!isOpen);
-          setcategory("expenses");
-        }}>
-          <i className="fa-solid fa-box text-xl"></i>
-          <span className="text-xs">Expenses</span>
-        </button>
-
-        {/* More Button */}
+        {/* More Options Button */}
         <button
           onClick={() => setShowLogout(!showLogout)}
-          className="flex flex-col items-center text-gray-600 hover:text-gray-800 transition-colors duration-200"
+          className="flex flex-col items-center text-gray-600 hover:text-gray-800 transition-all duration-200"
         >
-          <i className="fas fa-ellipsis-h text-xl"></i>
-          <span className="text-xs">More</span>
+          <FaEllipsisH className="text-xl" />
+          <span className="text-xs font-medium">More</span>
         </button>
       </div>
 
-      {/* Logout Container */}
-      <div
-        className={`fixed flex flex-col gap-4 justify-center items-center bottom-20 left-1/2 transform -translate-x-1/2 transition-all ${
-          showLogout ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
-      >
-        <Link to="/logout">
-          <button className="bg-gray-800 text-white px-5 py-3 rounded shadow-md hover:bg-gray-700">
-            Logout
-          </button>
-        </Link>
-        <Link to="#">
-          <button className="bg-gray-800 text-white px-5 py-3 rounded shadow-md hover:bg-gray-700">
-            Forget Transaction
-          </button>
-        </Link>
-        <Link to="#">
-          <button className="bg-gray-800 text-white px-5 py-3 rounded shadow-md hover:bg-gray-700">
-            Update And Delete TXN
-          </button>
-        </Link>
-        <Link to="/download.pdf">
-          <button className="bg-gray-800 text-white px-5 py-3 rounded shadow-md hover:bg-gray-700">
-            Download PDF
-          </button>
-        </Link>
-      </div>
+      {/* Logout and Other Options */}
+      <AnimatePresence>
+        {showLogout && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="fixed flex flex-col w-full gap-4 justify-center items-center bottom-20 left-1/2 transform -translate-x-1/2 bg-white shadow-lg rounded-lg p-4 border border-gray-300"
+          >
+            <button
+              onClick={() => {
+                localStorage.removeItem("token");
+                navigate("/login");
+                setShowLogout(false);
+              }}
+              className="bg-red-600 text-white px-5 py-2 rounded shadow-md hover:bg-red-500 w-full"
+            >
+              Logout
+            </button>
+              <button className="bg-gray-800 text-white px-5 py-2 rounded shadow-md hover:bg-gray-700 w-full">
+                Forget Transaction
+              </button>
+              <button className="bg-gray-800 text-white px-5 py-2 rounded shadow-md hover:bg-gray-700 w-full">
+                Update & Delete TXN
+              </button>
+              <button className="bg-blue-600 text-white px-5 py-2 rounded shadow-md hover:bg-blue-500 w-full">
+                Download PDF
+              </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
+      {/* Quick Modal */}
       <Quick isOpen={isOpen} onClose={() => setIsOpen(false)} category={category} />
     </div>
   );

@@ -10,15 +10,17 @@ const Google = () => {
     try {
       setloader(true);
       const result = await signInWithPopup(auth, googleProvider);
+      console.log(result)
       const idToken = await result.user.getIdToken(); // 🔥 Get Firebase ID Token
+      const photoUrl =  result.user.photoURL; // 🔥 Get Firebase ID Token
 
       // Send the ID token to the backend for verification
-      const response = await fetch("https://epassbook.onrender.com/api/auth/google", {
+      const response = await fetch("http://localhost:4000/api/auth/google", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ idToken }),
+        body: JSON.stringify({ idToken ,photoUrl }),
       });
 
       const data = await response.json();

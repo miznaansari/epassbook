@@ -10,6 +10,7 @@ interface ModalProps {
 }
 
 const UpdateAndDeleteModal: React.FC<ModalProps> = ({ isOpen, onClose, txnType, txnStatus }) => {
+
   const context = useContext(TxnContext);
   if (!context) {
     console.error("TxnContext is null! Ensure TxnState is wrapping this component.");
@@ -19,6 +20,8 @@ const UpdateAndDeleteModal: React.FC<ModalProps> = ({ isOpen, onClose, txnType, 
 
   // Error state
   const [errors, setErrors] = useState<{ amount?: string }>({});
+
+  const [loader, setloader] = useState(false)
 
   // Update txnType and txnStatus
   useEffect(() => {
@@ -48,11 +51,13 @@ const UpdateAndDeleteModal: React.FC<ModalProps> = ({ isOpen, onClose, txnType, 
   };
 
   // Submit handler
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    setloader(true);
     e.preventDefault();
     if (!errors.amount) {
       console.log("Form submitted", txnDetail);
-      addtxn();
+     await addtxn();
+      setloader(false);
     }
   };
 
@@ -129,9 +134,14 @@ const UpdateAndDeleteModal: React.FC<ModalProps> = ({ isOpen, onClose, txnType, 
                 required
               />
             </div>
-  
+            <div className="flex justify-center items-center">
+            {loader && (<>
+    <div className="w-5 h-5 border-4 mr-4 border-t-transparent border-blue-500 rounded-full animate-spin"></div><span>Processing...</span></>
+  )}
+  </div>
             {/* Buttons */}
             <div className="flex gap-2">
+         
               <button
                 type="submit"
                 className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 flex-1 disabled:bg-gray-400"

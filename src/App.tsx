@@ -11,6 +11,7 @@ import AuthState from './context/AuthState';
 import TxnState from "./context/TxnState";
 import BottomNavbar from "./components/BottomNavbar";
 import QuickState from "./context/QuickState";
+import UserDashboard from "./components/Userdashboard";
 
 // ✅ Define prop types for ProtectedRoute and PublicRoute
 interface RouteProps {
@@ -106,6 +107,7 @@ const App: React.FC = () => {
 
             {/* Protected Route - Redirect to login if not authenticated */}
             <Route path="/*" element={<ProtectedRoute component={<MainSections />} />} />
+            <Route path="/userdashboard" element={<ProtectedRoute component={<UserDashboard />} />} />
           </Routes>
           <BottomNavbar />
         </Router>
