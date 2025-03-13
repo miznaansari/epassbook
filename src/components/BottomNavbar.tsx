@@ -3,16 +3,23 @@ import { useNavigate } from "react-router-dom";
 import Quick from "./Quick";
 import { FaUtensils, FaPlaneDeparture, FaBox, FaEllipsisH } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
+import AddPreviousTxn from "./Addprevioustxn";
 
 const BottomNavbar: React.FC = () => {
   const [showLogout, setShowLogout] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState<string>("");
+  const [isOpenTxn, setIsOpenTxn] = useState(false);
   const navigate = useNavigate();
 
   const handleCategoryClick = (cat: string) => {
     setIsOpen(true);
     setCategory(cat);
+  };
+
+  const showTxn = () => {
+    setIsOpenTxn(true);
+    setShowLogout(false);
   };
 
   return (
@@ -24,7 +31,7 @@ const BottomNavbar: React.FC = () => {
           { icon: <FaBox />, label: "Expenses", category: "expenses" },
         ].map(({ icon, label, category }) => (
           <button
-            key={label}
+            key={category}
             onClick={() => handleCategoryClick(category)}
             className="flex flex-col items-center text-gray-600 hover:text-purple-600 transition-all duration-200"
           >
@@ -62,21 +69,27 @@ const BottomNavbar: React.FC = () => {
             >
               Logout
             </button>
-              <button className="bg-gray-800 text-white px-5 py-2 rounded shadow-md hover:bg-gray-700 w-full">
-                Forget Transaction
-              </button>
-              <button className="bg-gray-800 text-white px-5 py-2 rounded shadow-md hover:bg-gray-700 w-full">
-                Update & Delete TXN
-              </button>
-              <button className="bg-blue-600 text-white px-5 py-2 rounded shadow-md hover:bg-blue-500 w-full">
-                Download PDF
-              </button>
+            <button
+              className="bg-gray-800 text-white px-5 py-2 rounded shadow-md hover:bg-gray-700 w-full"
+              onClick={showTxn}
+            >
+              Add Previous Transaction
+            </button>
+            <button className="bg-gray-800 text-white px-5 py-2 rounded shadow-md hover:bg-gray-700 w-full">
+              Update & Delete TXN
+            </button>
+            <button className="bg-blue-600 text-white px-5 py-2 rounded shadow-md hover:bg-blue-500 w-full">
+              Download PDF
+            </button>
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* Quick Modal */}
       <Quick isOpen={isOpen} onClose={() => setIsOpen(false)} category={category} />
+
+      {/* Add Previous Transaction Modal */}
+      {isOpenTxn && <AddPreviousTxn setisOpenTxn={setIsOpenTxn} />}
     </div>
   );
 };

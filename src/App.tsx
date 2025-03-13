@@ -1,118 +1,86 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
-import { jwtDecode } from "jwt-decode";
-import './App.css';
-import Login from './components/Login';
-import SectionA from './components/SectionA';
-import SectionB from './components/SectionB';
-import SectionC from './components/SectionC';
-import Signup from './components/Signup';
-import AuthState from './context/AuthState';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
+import Login from "./components/Login";
+import "./App.css";
+import SectionA from "./components/SectionA";
+import SectionB from "./components/SectionB";
+import SectionC from "./components/SectionC";
+import AuthState from "./context/AuthState";
 import TxnState from "./context/TxnState";
-import BottomNavbar from "./components/BottomNavbar";
 import QuickState from "./context/QuickState";
-import UserDashboard from "./components/Userdashboard";
+import axios from "axios";
+import BottomNavbar from "./components/BottomNavbar";
 
-// ✅ Define prop types for ProtectedRoute and PublicRoute
-interface RouteProps {
-  component: React.ReactElement;
-}
+// 🔹 Protected Routes Component (Handles Authentication)
+const ProtectedRoutes: React.FC = () => {
+  const navigate = useNavigate();
+  const [token] = useState(localStorage.getItem("token"));
 
-// ✅ Decode JWT Token
-interface DecodedToken {
-  exp: number; // Expiration time
-}
-
-// ✅ ProtectedRoute - Only allow access if user has a valid token
-const ProtectedRoute: React.FC<RouteProps> = ({ component }) => {
-  const token = localStorage.getItem("token");
-
-  if (token) {
-    try {
-      const decoded: DecodedToken = jwtDecode(token);
-      const currentTime = Date.now() / 1000; // Convert to seconds
-      console.log(decoded);
-      if (decoded.exp < currentTime) {
-        localStorage.removeItem("token"); // Remove expired token
-        return <Navigate to="/login" />;
-      }
-
-      return component;
-    } catch (error) {
-      console.error("Invalid token:", error);
-      localStorage.removeItem("token"); // Remove invalid token
-      return <Navigate to="/login" />;
+  useEffect(() => {
+    if (!token) {
+      navigate("/login");
+      return;
     }
-  }
 
-  return <Navigate to="/login" />;
-};
+    const tokencheck = async () => {
+      try {
+        const response = await axios.post(
+          "https://epassbook.onrender.com/checktoken",
+          {},
+          { headers: { Authorization: token } }
+        );
 
-// ✅ PublicRoute - Prevent logged-in users from accessing login/signup
-const PublicRoute: React.FC<RouteProps> = ({ component }) => {
-  const token = localStorage.getItem("token");
-  return token ? <Navigate to="/" /> : component;
-};
+        if (response.data.error) {
+          localStorage.removeItem("token");
+          navigate("/login");
+        }
+      } catch (error) {
+        console.error("Token validation failed", error);
+        localStorage.removeItem("token");
+        navigate("/login");
+      }
+    };
 
-// ✅ MainSections Component
-const MainSections: React.FC = () => {
+    tokencheck();
+  }, [navigate, token]);
+
   return (
     <>
       <SectionA />
       <SectionB />
       <SectionC />
+      <BottomNavbar />
     </>
   );
 };
 
-// ✅ Offline Popup Component
-const OfflinePopup: React.FC<{ isOffline: boolean }> = ({ isOffline }) => {
-  if (!isOffline) return null;
-  return (
-    <div className="fixed top-10  bg-red-500 z-50 rounded text-white p-5" >
-      ⚠️ You are offline! Check your internet connection.
-    </div>
-  );
-};
-
-const App: React.FC = () => {
-  const [isOffline, setIsOffline] = useState<boolean>(!navigator.onLine);
+// 🔹 Login Component with Redirection (Fix for Incorrect Hook Usage)
+const LoginPage: React.FC = () => {
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Listen for online/offline status changes
-    const handleOnline = () => setIsOffline(false);
-    const handleOffline = () => setIsOffline(true);
+    const token = localStorage.getItem("token");
+    if (token) {
+      navigate("/");
+    }
+  }, [navigate]);
 
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
+  return <Login />;
+};
 
-    return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
-    };
-  }, []);
-
+// 🔹 App Component
+const App: React.FC = () => {
   return (
     <AuthState>
       <TxnState>
-      <QuickState>
-        <Router>
-          {/* Show Offline Popup */}
-          <OfflinePopup isOffline={isOffline} />
-
-          <Routes>
-            {/* Public Routes - Redirect to MainSections if already logged in */}
-            <Route path="/login" element={<PublicRoute component={<Login />} />} />
-            <Route path="/signup" element={<PublicRoute component={<Signup />} />} />
-
-            {/* Protected Route - Redirect to login if not authenticated */}
-            <Route path="/*" element={<ProtectedRoute component={<MainSections />} />} />
-            <Route path="/userdashboard" element={<ProtectedRoute component={<UserDashboard />} />} />
-          </Routes>
-          <BottomNavbar />
-        </Router>
-      </QuickState>
-
+        <QuickState>
+          <Router>
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/" element={<ProtectedRoutes />} />
+            </Routes>
+          </Router>
+        </QuickState>
       </TxnState>
     </AuthState>
   );

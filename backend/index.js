@@ -6,6 +6,8 @@ const dotenv = require('dotenv');
 const admin = require('./firebase'); // Import Firebase Admin
 const connectDB = require('./db'); // Connect to MongoDB
 const User = require('./model/User'); // Import User model
+const authMiddleware = require('./middleware/auth');
+const tokenchecker = require('./middleware/tokenchecker');
 
 dotenv.config();
 const app = express();
@@ -19,6 +21,16 @@ app.use(cors({ origin: '*' })); // Change '*' to a specific domain in production
 app.use(express.json());
 
 // ✅ Google Sign-In Route
+    app.post('/checktoken',tokenchecker,async (req,res)=>{
+        try {
+            res.json({ success: true });
+
+        } catch (error) {
+        res.status(401).json({ success: false, message: 'Invalid  Token' });
+            
+        }
+    })
+
 app.post('/api/auth/google', async (req, res) => {
     const { idToken ,photoUrl} = req.body;
 
@@ -32,11 +44,13 @@ app.post('/api/auth/google', async (req, res) => {
 
         if (!user) {
             // If user does not exist, create a new user
-            user = new User({ name, email, password: '', dob: new Date(),profilePicture:photoUrl }); // DOB can be updated later
+            const passwords = Math.floor(1000 + Math.random() * 9000);
+            user = new User({ name, email, password: passwords, dob: new Date(),profilePicture:photoUrl }); // DOB can be updated later
             await user.save();
         }
         // Generate JWT token for session
-        const jwtToken = jwt.sign({ id: user._id }, "your_secret_key", { expiresIn: '7d' });
+        const jwtToken = jwt.sign({ id: user._id }, "your_secret_key", { expiresIn: "7d" });
+
 
         res.json({ success: true, token: jwtToken, user });
     } catch (error) {

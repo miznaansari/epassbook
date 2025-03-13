@@ -2,13 +2,9 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import EditableModal from "./EditableModal"; // Import the modal component
 
-
-
-
-
 interface Transaction {
-  id: string;  // MongoDB _id is a string
-  transaction_type: string;  // Allow any value from API
+  id: string;
+  transaction_type: string;
   transaction_name: string;
   amount: number;
   transaction_status: string;
@@ -27,8 +23,10 @@ const SectionC: React.FC = () => {
     transaction_status: "",
     created_at: "",
   });
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const transactionsPerPage = 5;
   const token = localStorage.getItem("token");
 
   const fetchTxn = async () => {
@@ -38,26 +36,30 @@ const SectionC: React.FC = () => {
         { filter: "monthly" },
         {
           headers: {
-            Authorization: token || "", // Ensure token is never null
+            Authorization: token || "",
             "Content-Type": "application/json",
           },
         }
       );
 
-      // Safely transform API data
       const formattedData: Transaction[] = response.data.transactions.map((txn: any) => ({
-        id: String(txn._id), // Ensure id is always a string
-        transaction_type: txn.transaction_type || "unknown", // Handle missing type
+        id: String(txn._id),
+        transaction_type: txn.transaction_type || "unknown",
         transaction_name: txn.transaction_name || "Unnamed",
-        amount: typeof txn.amount === "object" 
-          ? parseFloat(txn.amount.$numberDecimal || "0") 
+        amount: typeof txn.amount === "object"
+          ? parseFloat(txn.amount.$numberDecimal || "0")
           : parseFloat(txn.amount || "0"),
         transaction_status: txn.transaction_status || "unknown",
         created_at: txn.createdAt || new Date().toISOString(),
-        description: txn.description || "", // Ensure description is always a string
+        description: txn.description || "",
       }));
 
-      setAllTxn(formattedData);
+      // Sort transactions by created_at (latest first)
+      const sortedData = formattedData.sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+
+      setAllTxn(sortedData);
     } catch (error) {
       console.error("Error fetching transactions:", error);
     }
@@ -67,9 +69,25 @@ const SectionC: React.FC = () => {
     fetchTxn();
   }, []);
 
+  // Filter transactions based on selected type
   const filteredTransactions = alltxn.filter(
     (transaction) => filter === "all" || transaction.transaction_type === filter
   );
+
+  // Pagination logic
+  const indexOfLastTransaction = currentPage * transactionsPerPage;
+  const indexOfFirstTransaction = indexOfLastTransaction - transactionsPerPage;
+  const currentTransactions = filteredTransactions.slice(indexOfFirstTransaction, indexOfLastTransaction);
+
+  const totalPages = Math.ceil(filteredTransactions.length / transactionsPerPage);
+
+  const nextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
+
+  const prevPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
 
   const viewAllDetail = (transaction: Transaction) => {
     setSelectedTransaction(transaction);
@@ -86,7 +104,7 @@ const SectionC: React.FC = () => {
             className={`p-2 rounded-lg shadow-md flex-1 ${
               filter === type ? "bg-blue-500 text-white" : "bg-gray-200"
             }`}
-            onClick={() => setFilter(type)}
+            onClick={() => { setFilter(type); setCurrentPage(1); }} // Reset to first page when filter changes
           >
             {type.charAt(0).toUpperCase() + type.slice(1)}
           </button>
@@ -104,8 +122,8 @@ const SectionC: React.FC = () => {
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200">
-          {filteredTransactions.length > 0 ? (
-            filteredTransactions.map((transaction) => (
+          {currentTransactions.length > 0 ? (
+            currentTransactions.map((transaction) => (
               <tr
                 key={transaction.id}
                 className="hover:bg-gray-50 cursor-pointer"
@@ -163,11 +181,34 @@ const SectionC: React.FC = () => {
         </tbody>
       </table>
 
+      {/* Pagination Controls */}
+      {filteredTransactions.length > transactionsPerPage && (
+        <div className="flex justify-between mt-4">
+          <button
+            onClick={prevPage}
+            disabled={currentPage === 1}
+            className={`px-4 py-2 mx-2 rounded-lg ${
+              currentPage === 1 ? "bg-gray-300 cursor-not-allowed" : "bg-blue-500 text-white"
+            }`}
+          >
+            Back
+          </button>
+          <button
+            onClick={nextPage}
+            disabled={currentPage === totalPages}
+            className={`px-4 py-2 mx-2 rounded-lg ${
+              currentPage === totalPages ? "bg-gray-300 cursor-not-allowed" : "bg-blue-500 text-white"
+            }`}
+          >
+            Next
+          </button>
+        </div>
+      )}
+
       {/* Editable Modal */}
       {isModalOpen && selectedTransaction && (
         <EditableModal
-        singleTransaction={selectedTransaction }
-        
+          singleTransaction={selectedTransaction}
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
         />

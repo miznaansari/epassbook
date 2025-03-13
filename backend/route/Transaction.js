@@ -5,6 +5,26 @@ const authMiddleware = require('../middleware/auth'); // Import JWT middleware
 
 const mongoose = require("mongoose");
 
+    router.post('/addprevioustxn',authMiddleware , async (req , res)=>{
+        const { amount, transaction_name, description, createdAt } = req.body;
+        const user_id = req.user.id;
+        const newTransaction = new UserTransaction({
+            user_id,
+            transaction_name,
+            transaction_type,
+            transaction_status,
+            amount, 
+            description,
+            createdAt
+        });
+
+        await newTransaction.save();
+        res.status(201).json({ message: "Transaction added successfully", transaction: newTransaction });
+
+
+    })
+
+
     router.put('/edittxn', authMiddleware, async (req, res) => {
     try {
         const txnId = req.query.id;
