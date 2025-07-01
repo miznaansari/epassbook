@@ -34,7 +34,7 @@ const SectionB = () => {
 
       {/* Add Lending Button */}
       <button
-        onClick={() => openModal("lending","borrow")}
+        onClick={() => openModal("lending","lending_pending")}
         className="bg-blue-500 text-white p-3 rounded-lg shadow-md hover:bg-blue-600 flex items-center text-xs space-x-2"
       >
         <i className="fas fa-hand-holding-usd text-sm"></i>

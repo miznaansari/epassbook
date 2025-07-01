@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import EditableModal from "./EditableModal"; // Import the modal component
+import PayBorrowModel from "./PayBorrowModel";
 
 interface Transaction {
   id: string;
@@ -23,8 +24,17 @@ const SectionC: React.FC = () => {
     transaction_status: "",
     created_at: "",
   });
+  const [userPayment, setUserPayment] = useState<Transaction>({
+    id: "",
+    transaction_type: "",
+    transaction_name: "",
+    amount: 0,
+    transaction_status: "",
+    created_at: "",
+  });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPayBorrowModel, setIsPayBorrowModel] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const transactionsPerPage = 5;
   const token = localStorage.getItem("token");
@@ -33,7 +43,7 @@ const SectionC: React.FC = () => {
     try {
       const response = await axios.post(
         "https://epassbook.onrender.com/api/fetchtxn",
-        { filter: "monthly" },
+        { filter: "all" },
         {
           headers: {
             Authorization: token || "",
@@ -94,6 +104,13 @@ const SectionC: React.FC = () => {
     setIsModalOpen(true);
   };
 
+  const payAmount = (txn: Transaction) => {
+    console.log(txn)
+    setUserPayment(txn);
+
+    setIsPayBorrowModel(true);
+  }
+
   return (
     <div>
       {/* Filter Buttons */}
@@ -101,9 +118,8 @@ const SectionC: React.FC = () => {
         {["all", "loan", "lending"].map((type) => (
           <button
             key={type}
-            className={`p-2 rounded-lg shadow-md flex-1 ${
-              filter === type ? "bg-blue-500 text-white" : "bg-gray-200"
-            }`}
+            className={`p-2 rounded-lg shadow-md flex-1 ${filter === type ? "bg-blue-500 text-white" : "bg-gray-200"
+              }`}
             onClick={() => { setFilter(type); setCurrentPage(1); }} // Reset to first page when filter changes
           >
             {type.charAt(0).toUpperCase() + type.slice(1)}
@@ -127,17 +143,17 @@ const SectionC: React.FC = () => {
               <tr
                 key={transaction.id}
                 className="hover:bg-gray-50 cursor-pointer"
-                onClick={() => viewAllDetail(transaction)}
+
               >
-                <td className="py-4 px-4 text-[11px]">
+                <td className="py-4 px-4 text-[11px]" onClick={() => viewAllDetail(transaction)}>
                   {`...${transaction.id.slice(-4)}`} / {transaction.transaction_type}
                 </td>
-                <td className="py-4 px-4">{transaction.transaction_name}</td>
-                <td className="py-4 px-4">{transaction.amount.toFixed(2)}</td>
+                <td onClick={() => viewAllDetail(transaction)} className="py-4 px-4">{transaction.transaction_name}</td>
+                <td onClick={() => viewAllDetail(transaction)} className="py-4 px-4">{transaction.amount.toFixed(2)}</td>
                 <td className="py-4 px-4 text-center">
                   {transaction.transaction_type === "loan" &&
-                  transaction.transaction_status === "loan_pending" ? (
-                    <button className="px-3 py-1 text-xs font-semibold text-blue-700 bg-blue-100 rounded-md hover:bg-blue-200">
+                    transaction.transaction_status === "loan_pending" ? (
+                    <button className="px-3 py-1 text-xs font-semibold text-blue-700 bg-blue-100 rounded-md hover:bg-blue-200" onClick={() => payAmount(transaction)}>
                       Pay
                     </button>
                   ) : transaction.transaction_type === "loan" &&
@@ -187,18 +203,16 @@ const SectionC: React.FC = () => {
           <button
             onClick={prevPage}
             disabled={currentPage === 1}
-            className={`px-4 py-2 mx-2 rounded-lg ${
-              currentPage === 1 ? "bg-gray-300 cursor-not-allowed" : "bg-blue-500 text-white"
-            }`}
+            className={`px-4 py-2 mx-2 rounded-lg ${currentPage === 1 ? "bg-gray-300 cursor-not-allowed" : "bg-blue-500 text-white"
+              }`}
           >
             Back
           </button>
           <button
             onClick={nextPage}
             disabled={currentPage === totalPages}
-            className={`px-4 py-2 mx-2 rounded-lg ${
-              currentPage === totalPages ? "bg-gray-300 cursor-not-allowed" : "bg-blue-500 text-white"
-            }`}
+            className={`px-4 py-2 mx-2 rounded-lg ${currentPage === totalPages ? "bg-gray-300 cursor-not-allowed" : "bg-blue-500 text-white"
+              }`}
           >
             Next
           </button>
@@ -211,6 +225,14 @@ const SectionC: React.FC = () => {
           singleTransaction={selectedTransaction}
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
+        />
+      )}
+
+      {isPayBorrowModel && userPayment && (
+        <PayBorrowModel
+          singleTransaction={userPayment}
+          isOpen={isPayBorrowModel}
+          onClose={() => setIsPayBorrowModel(false)}
         />
       )}
     </div>

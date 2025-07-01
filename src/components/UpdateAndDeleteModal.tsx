@@ -28,6 +28,7 @@ const UpdateAndDeleteModal: React.FC<ModalProps> = ({ isOpen, onClose, txnType, 
     setTxnDetail((prev) => ({
       ...prev,
       transaction_type: txnType,
+    
       transaction_status: txnStatus,
     }));
   }, [txnType, txnStatus]);
@@ -53,6 +54,11 @@ const UpdateAndDeleteModal: React.FC<ModalProps> = ({ isOpen, onClose, txnType, 
   // Submit handler
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     setloader(true);
+     setTxnDetail((prev) => ({
+      ...prev,
+      balance: prev.amount,
+      
+    }));
     e.preventDefault();
     if (!errors.amount) {
       console.log("Form submitted", txnDetail);
@@ -82,7 +88,7 @@ const UpdateAndDeleteModal: React.FC<ModalProps> = ({ isOpen, onClose, txnType, 
             damping: 15,
           }}
         >
-          <h2 className="text-xl font-semibold mb-4">Update & Delete TXN</h2>
+          <h2 className="text-xl font-semibold mb-4">{txnType === 'lending'?'Lending Txn':''} {txnType === 'loan'?'Loan Txn':''} {txnType === 'spend'?'Spend Txn':''}</h2>
   
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div>
