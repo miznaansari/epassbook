@@ -5,27 +5,64 @@ const authMiddleware = require('../middleware/auth'); // Import JWT middleware
 
 const mongoose = require("mongoose");
 
-    router.post('/addprevioustxn',authMiddleware , async (req , res)=>{
-        const { amount, transaction_name, description, createdAt } = req.body;
-        const user_id = req.user.id;
-        const newTransaction = new UserTransaction({
-            user_id,
-            transaction_name,
-            transaction_type,
-            transaction_status,
-            amount, 
-            description,
-            createdAt
-        });
+router.post('/addprevioustxn', authMiddleware, async (req, res) => {
+    const { amount, transaction_name, description, createdAt } = req.body;
+    const user_id = req.user.id;
+    const newTransaction = new UserTransaction({
+        user_id,
+        transaction_name,
+        transaction_type,
+        transaction_status,
+        amount,
+        description,
+        createdAt
+    });
 
-        await newTransaction.save();
-        res.status(201).json({ message: "Transaction added successfully", transaction: newTransaction });
-
-
-    })
+    await newTransaction.save();
+    res.status(201).json({ message: "Transaction added successfully", transaction: newTransaction });
 
 
-    router.put('/edittxn', authMiddleware, async (req, res) => {
+})
+
+//payLoanBorrowtxn
+router.put('/payLoanBorrowtxn', authMiddleware, async (req, res) => {
+    try {
+        const txnId = req.query.id;
+        const userId = req.user.id;
+        const { balance, amount, transaction_name, description } = req.body;
+
+        if (!txnId) {
+            return res.status(400).json({ error: "Transaction ID is required" });
+        }
+
+        const txn = await UserTransaction.findById(txnId);
+
+        if (!txn) {
+            return res.status(404).json({ error: "Transaction not found" });
+        }
+
+        if (txn.user_id.toString() !== userId) {
+            return res.status(403).json({ error: "Unauthorized to edit this transaction" });
+        }
+
+        // ✅ Validate amount
+        const numericAmount = parseFloat(amount);
+        if (isNaN(numericAmount) || numericAmount <= 0) {
+            return res.status(400).json({ error: "Invalid amount" });
+        }
+
+        if (amount) txn.balance = txn.balance - numericAmount;
+
+        await txn.save();
+        res.status(200).json({ message: "Transaction edited successfully", transaction: txn });
+    } catch (error) {
+        console.error("Error editing transaction:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+//edittxn
+router.put('/edittxn', authMiddleware, async (req, res) => {
     try {
         const txnId = req.query.id;
         const userId = req.user.id;
@@ -39,7 +76,7 @@ const mongoose = require("mongoose");
 
         if (!txn) {
             return res.status(404).json({ error: "Transaction not found" });
-            }
+        }
 
         if (txn.user_id.toString() !== userId) {
             return res.status(403).json({ error: "Unauthorized to edit this transaction" });
@@ -62,7 +99,7 @@ router.delete('/deletetxn', authMiddleware, async (req, res) => {
     try {
         const txnId = req.query.id;
         const userId = req.user.id;
-console.log(txnId);
+        console.log(txnId);
         const txn = await UserTransaction.findById(txnId);
 
         if (!txn) {
@@ -84,8 +121,8 @@ console.log(txnId);
 
 router.post("/fetchamount", authMiddleware, async (req, res) => {
     try {
-        const userId = req.user.id; 
-       
+        const userId = req.user.id;
+
 
         const userObjectId = new mongoose.Types.ObjectId(userId);
 
@@ -113,20 +150,20 @@ router.post("/fetchamount", authMiddleware, async (req, res) => {
 
         const getAmount = async (start, end) => {
             const result = await UserTransaction.aggregate([
-                { 
-                    $match: { 
-                        user_id: userObjectId,  
+                {
+                    $match: {
+                        user_id: userObjectId,
                         createdAt: { $gte: start, $lte: end }
                     }
                 },
-                { 
-                    $group: { 
-                        _id: null, 
+                {
+                    $group: {
+                        _id: null,
                         total: { $sum: { $toDecimal: "$amount" } }
                     }
                 }
             ]);
-            return result.length ? parseFloat(result[0].total) : 0;  
+            return result.length ? parseFloat(result[0].total) : 0;
         };
 
         const [todayAmount, yesterdayAmount, monthlyAmount, yearlyAmount] = await Promise.all([
@@ -136,32 +173,32 @@ router.post("/fetchamount", authMiddleware, async (req, res) => {
             getAmount(startOfYearUTC, endOfYearUTC),
         ]);
 
-         // Use $facet to perform both aggregations in one request
-         const result = await UserTransaction.aggregate([
-            { 
-                $match: { 
-                    user_id: userObjectId, 
+        // Use $facet to perform both aggregations in one request
+        const result = await UserTransaction.aggregate([
+            {
+                $match: {
+                    user_id: userObjectId,
                     transaction_type: { $in: ['loan', 'lending'] }
-                } 
+                }
             },
             {
                 $facet: {
                     loanSum: [
                         { $match: { transaction_type: 'loan' } },
-                        { 
-                            $group: { 
-                                _id: null, 
-                                totalAmount: { $sum: { $toDecimal: "$amount" } } 
-                            } 
+                        {
+                            $group: {
+                                _id: null,
+                                totalAmount: { $sum: { $toDecimal: "$amount" } }
+                            }
                         }
                     ],
                     lendingSum: [
                         { $match: { transaction_type: 'lending' } },
-                        { 
-                            $group: { 
-                                _id: null, 
-                                totalAmount: { $sum: { $toDecimal: "$amount" } } 
-                            } 
+                        {
+                            $group: {
+                                _id: null,
+                                totalAmount: { $sum: { $toDecimal: "$amount" } }
+                            }
                         }
                     ]
                 }
@@ -173,7 +210,7 @@ router.post("/fetchamount", authMiddleware, async (req, res) => {
         const total_lending_amount = result[0]?.lendingSum[0]?.totalAmount?.toString() || "0";
 
 
-        res.json({ todayAmount, yesterdayAmount, monthlyAmount, yearlyAmount ,total_loan_amount,total_lending_amount });
+        res.json({ todayAmount, yesterdayAmount, monthlyAmount, yearlyAmount, total_loan_amount, total_lending_amount });
 
     } catch (error) {
         console.error(error);
@@ -188,30 +225,30 @@ router.post('/fetchtxnLL', authMiddleware, async (req, res) => {
 
         // Use $facet to perform both aggregations in one request
         const result = await UserTransaction.aggregate([
-            { 
-                $match: { 
-                    user_id: userObjectId, 
+            {
+                $match: {
+                    user_id: userObjectId,
                     transaction_type: { $in: ['loan', 'lending'] }
-                } 
+                }
             },
             {
                 $facet: {
                     loanSum: [
                         { $match: { transaction_type: 'loan' } },
-                        { 
-                            $group: { 
-                                _id: null, 
-                                totalAmount: { $sum: { $toDecimal: "$amount" } } 
-                            } 
+                        {
+                            $group: {
+                                _id: null,
+                                totalAmount: { $sum: { $toDecimal: "$amount" } }
+                            }
                         }
                     ],
                     lendingSum: [
                         { $match: { transaction_type: 'lending' } },
-                        { 
-                            $group: { 
-                                _id: null, 
-                                totalAmount: { $sum: { $toDecimal: "$amount" } } 
-                            } 
+                        {
+                            $group: {
+                                _id: null,
+                                totalAmount: { $sum: { $toDecimal: "$amount" } }
+                            }
                         }
                     ]
                 }
@@ -282,7 +319,7 @@ router.post('/fetchtxn', authMiddleware, async (req, res) => {
         }
 
         let query = { user_id: user_id };
-        
+
         // Apply date filter only if not fetching "all" transactions
         if (startDate && endDate) {
             query.createdAt = { $gte: startDate, $lt: endDate };
@@ -302,8 +339,8 @@ router.post('/fetchtxn', authMiddleware, async (req, res) => {
 // Add transaction (Protected Route)
 router.post('/addtxn', authMiddleware, async (req, res) => {
     try {
-        let  { transaction_name, transaction_type, transaction_status, amount, description,balance } = req.body;
-        
+        let { transaction_name, transaction_type, transaction_status, amount, description, balance } = req.body;
+
         // Use `req.user.id` from JWT payload instead of manually passing `user_id`
         const user_id = req.user.id;
 
@@ -311,8 +348,8 @@ router.post('/addtxn', authMiddleware, async (req, res) => {
             return res.status(400).json({ error: "All required fields must be provided" });
         }
 
-        if(transaction_type==='spend'){
-            balance=0
+        if (transaction_type === 'spend') {
+            balance = 0
         }
 
         const newTransaction = new UserTransaction({
@@ -320,8 +357,8 @@ router.post('/addtxn', authMiddleware, async (req, res) => {
             transaction_name,
             transaction_type,
             transaction_status,
-            amount, 
-            description,balance
+            amount,
+            description, balance
         });
 
         await newTransaction.save();

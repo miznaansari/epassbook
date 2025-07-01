@@ -6,7 +6,7 @@ interface TransactionData {
     amount: number;
     transaction_name: string;
     description: string;
-  }
+}
 const TxnState: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
     // const [todayamount, settodayamount] = useState<number | null>(null);
@@ -35,7 +35,39 @@ const TxnState: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [monthlyAmount, setmonthlyAmount] = useState<number | null>(null);
 
 
+    const payLoanBorrowtxn = async (id: string, formdata: TransactionData) => {
+        try {
+            const response = await axios.post(
+                `${url}/api/payLoanBorrowtxnedittxn`,
+                formdata,
+                {
+                    params: { id: id },
+                    headers: { Authorization: token }
+                }
+            );
+            response.data
+            console.log(response.data); // Handle the response
 
+
+            const a = parseFloat(txnDetail.amount) + todayAmount
+            settodayAmount(a);
+            // Vibration
+            if (navigator.vibrate) {
+                navigator.vibrate([200, 100, 200]); // Pattern: Vibrate, Pause, Vibrate
+            }
+
+            if (txnDetail.transaction_type === "spend") {
+
+            }
+
+            // Play Success Sound
+            const successSound = new Audio('https://dl.prokerala.com/downloads/ringtones/files/mp3/success-level-52186.mp3');
+            successSound.play();
+
+        } catch (error) {
+            console.error("Error adding transaction:", error);
+        }
+    }
 
     const addtxn = async () => {
         try {
@@ -131,17 +163,17 @@ const TxnState: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             });
     }
 
-    const deletetxn =(id: string,)=>{
-      axios.delete(`${url}/api/deletetxn`, {
+    const deletetxn = (id: string,) => {
+        axios.delete(`${url}/api/deletetxn`, {
             params: { id: id },
             headers: { Authorization: token },
-          })
+        })
 
     }
 
-    const edittxn = async (id: string,formdata: TransactionData) => {
+    const edittxn = async (id: string, formdata: TransactionData) => {
         try {
-             await axios.put(`${url}/api/edittxn`, 
+            await axios.put(`${url}/api/edittxn`,
                 {
                     amount: formdata.amount,
                     transaction_name: formdata.transaction_name,
@@ -157,10 +189,10 @@ const TxnState: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             console.error("Error updating transaction:", error);
         }
     };
-    
+
 
     return (
-        <TxnContext.Provider value={{ txnDetail, setTxnDetail, addtxn, fetchallamount,deletetxn,edittxn, loanAmount, lendingAmount, todayAmount, monthlyAmount, addquickitemstxn }}>
+        <TxnContext.Provider value={{ payLoanBorrowtxn, txnDetail, setTxnDetail, addtxn, fetchallamount, deletetxn, edittxn, loanAmount, lendingAmount, todayAmount, monthlyAmount, addquickitemstxn }}>
             {children}
         </TxnContext.Provider>
     );

@@ -8,6 +8,7 @@ interface Transaction {
   transaction_type: string;
   transaction_name: string;
   amount: number;
+  balance: number;
   transaction_status: string;
   created_at: string;
   description?: string;
@@ -23,6 +24,7 @@ const SectionC: React.FC = () => {
     amount: 0,
     transaction_status: "",
     created_at: "",
+    balance: 0,
   });
   const [userPayment, setUserPayment] = useState<Transaction>({
     id: "",
@@ -31,6 +33,7 @@ const SectionC: React.FC = () => {
     amount: 0,
     transaction_status: "",
     created_at: "",
+    balance: 0,
   });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -57,6 +60,9 @@ const SectionC: React.FC = () => {
         transaction_type: txn.transaction_type || "unknown",
         transaction_name: txn.transaction_name || "Unnamed",
         amount: typeof txn.amount === "object"
+          ? parseFloat(txn.amount.$numberDecimal || "0")
+          : parseFloat(txn.amount || "0"),
+        balance: typeof txn.balance === "object"
           ? parseFloat(txn.amount.$numberDecimal || "0")
           : parseFloat(txn.amount || "0"),
         transaction_status: txn.transaction_status || "unknown",

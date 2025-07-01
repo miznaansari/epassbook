@@ -1,12 +1,13 @@
 import React, { useContext, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import TxnContext from "../context/TxnContext";
-
+import TextField from '@mui/material/TextField';
 interface Transaction {
   id: string;  // MongoDB _id is a string
   transaction_type: string;  // Allow any value from API
   transaction_name: string;
   amount: number;
+  balance: number;
   transaction_status: string;
   created_at: string;
   description?: string;
@@ -14,6 +15,7 @@ interface Transaction {
 interface TransactionData {
   transaction_name: string;
   amount: number;
+  balance: number;
 
   description: string;
 }
@@ -27,20 +29,20 @@ interface ModalProps {
 
 
 const PayBorrowModel: React.FC<ModalProps> = ({ singleTransaction, isOpen, onClose }) => {
-   if (!singleTransaction) return null; 
+  if (!singleTransaction) return null;
   const context = useContext(TxnContext);
   if (!context) {
     throw new Error("TxnContext must be used within a provider");
   }
 
-  const { deletetxn, edittxn } = context;
+  const { deletetxn, payLoanBorrowtxn } = context;
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState(singleTransaction || {});
 
-  
 
 
-  const [errors, setErrors] = useState<{ amount?: string }>({});
+
+  const [errors, setErrors] = useState<{ balance?: string }>({});
   const [loading, setLoading] = useState(false);
 
   // Sync state when modal opens with the correct transaction
@@ -51,37 +53,62 @@ const PayBorrowModel: React.FC<ModalProps> = ({ singleTransaction, isOpen, onClo
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
-    if (!formData) return; // Prevent errors when `formData` is null
+    if (!formData) return;
 
-    setFormData((prev) => ({
-      ...prev!,
-      [name]: name === "amount" ? parseFloat(value) || "" : value,
-    }));
+    if (name === "amount") {
+      const numericValue = value === '' ? 0 : parseFloat(value);
 
-    if (name === "amount" && !/^\d*\.?\d*$/.test(value)) {
-      setErrors((prev) => ({ ...prev, amount: "Amount must be a valid number" }));
-    } else {
+      // Check for valid number format
+      if (!/^\d*\.?\d*$/.test(value)) {
+        setErrors((prev) => ({
+          ...prev,
+          amount: "Amount must be a valid number",
+        }));
+        return;
+      }
+
+      // Check that amount is not more than balance
+      if (numericValue > (formData.balance ?? 0)) {
+        setErrors((prev) => ({
+          ...prev,
+          amount: "Amount cannot be more than balance",
+        }));
+        return;
+      }
+
+      // No errors
       setErrors((prev) => ({ ...prev, amount: undefined }));
+
+      setFormData((prev) => ({
+        ...prev!,
+        amount: value ==='' ? 0 : numericValue,
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev!,
+        [name]: value,
+      }));
     }
   };
-  
+
 
   const handleSave = async () => {
     if (!formData || !singleTransaction) return;
     setLoading(true);
-  
+
     // Ensure only the required fields are passed
     const formattedData: TransactionData = {
       transaction_name: formData.transaction_name,
       amount: formData.amount,
+      balance: formData.amount,
       description: formData.description || ""  // Ensure non-null value
     };
-  
-    await edittxn(singleTransaction.id.toString(), formattedData);
+
+    await payLoanBorrowtxn(singleTransaction.id.toString(), formattedData);
     setIsEditing(false);
     setLoading(false);
   };
-  
+
 
   const handleDelete = async () => {
     if (!singleTransaction) return;
@@ -111,36 +138,35 @@ const PayBorrowModel: React.FC<ModalProps> = ({ singleTransaction, isOpen, onClo
             <h2 className="text-xl font-semibold mb-4">Paying User Loan</h2>
 
             <div className="space-y-3">
-              <input
-                type="text"
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                disabled={!isEditing}
-                placeholder="Enter Description"
-                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              />
-              <input
-                type="text"
+
+              <TextField
+                size="small"
+                sx={{ my: 1 }}
+                label="Transaction Name"
+                variant="outlined"
                 name="transaction_name"
                 value={formData.transaction_name}
                 onChange={handleChange}
                 disabled={!isEditing}
+                fullWidth
                 placeholder="Enter Transaction Name"
-                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               />
-              <input
-                type="text"
+
+              <TextField
+                size="small"
+                sx={{ my: 1 }}
+                label="Amount"
+                variant="outlined"
                 name="amount"
                 value={formData.amount}
                 onChange={handleChange}
                 disabled={!isEditing}
-                placeholder="Enter Amount"
-                className={`w-full p-2 border ${
-                  errors.amount ? "border-red-500" : "border-gray-300"
-                } rounded-lg focus:ring-2 focus:ring-blue-500`}
+                error={!!errors.balance}
+                helperText={errors.balance}
+                fullWidth
               />
-              {errors.amount && <p className="text-red-500 text-xs mt-1">{errors.amount}</p>}
+
+              {errors.balance && <p className="text-red-500 text-xs mt-1">{errors.balance}</p>}
             </div>
 
             <div className="flex gap-2 mt-4">
@@ -148,7 +174,7 @@ const PayBorrowModel: React.FC<ModalProps> = ({ singleTransaction, isOpen, onClo
                 <button
                   className="bg-green-500 text-white px-4 py-2 rounded-lg flex-1 hover:bg-green-600 disabled:bg-gray-400"
                   onClick={handleSave}
-                  disabled={!!errors.amount || loading}
+                  disabled={!!errors.balance || loading}
                 >
                   {loading ? "Saving..." : "Save"}
                 </button>
