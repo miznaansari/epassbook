@@ -37,7 +37,7 @@ const TxnState: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
     const payLoanBorrowtxn = async (id: string, formdata: TransactionData) => {
         try {
-            const response = await axios.post(
+            const response = await axios.put(
                 `${url}/api/payLoanBorrowtxn`,
                 formdata,
                 {
