@@ -25,6 +25,10 @@ const userTransactionSchema = new Schema({
     type: mongoose.Types.Decimal128, // Using Decimal128 for precise decimal handling
     required: true 
   },
+  balance: { 
+    type: mongoose.Types.Decimal128, // Using Decimal128 for precise decimal handling
+    required: true 
+  },
   description: { 
     type: String, 
     default: null 

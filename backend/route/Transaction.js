@@ -302,7 +302,7 @@ router.post('/fetchtxn', authMiddleware, async (req, res) => {
 // Add transaction (Protected Route)
 router.post('/addtxn', authMiddleware, async (req, res) => {
     try {
-        const { transaction_name, transaction_type, transaction_status, amount, description } = req.body;
+        const { transaction_name, transaction_type, transaction_status, amount, description,balance } = req.body;
         
         // Use `req.user.id` from JWT payload instead of manually passing `user_id`
         const user_id = req.user.id;
@@ -317,7 +317,7 @@ router.post('/addtxn', authMiddleware, async (req, res) => {
             transaction_type,
             transaction_status,
             amount, 
-            description
+            description,balance
         });
 
         await newTransaction.save();
