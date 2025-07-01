@@ -63,8 +63,8 @@ const SectionC: React.FC = () => {
           ? parseFloat(txn.amount.$numberDecimal || "0")
           : parseFloat(txn.amount || "0"),
         balance: typeof txn.balance === "object"
-          ? parseFloat(txn.amount.$numberDecimal || "0")
-          : parseFloat(txn.amount || "0"),
+          ? parseFloat(txn.balance.$numberDecimal || "0")
+          : parseFloat(txn.balance || "0"),
         transaction_status: txn.transaction_status || "unknown",
         created_at: txn.createdAt || new Date().toISOString(),
         description: txn.description || "",
@@ -139,7 +139,7 @@ const SectionC: React.FC = () => {
           <tr>
             <th className="py-4 px-4 text-[10px]">Txn ID / Type</th>
             <th className="py-4 px-4">Name</th>
-            <th className="py-4 px-4">Amount</th>
+            <th className="py-4 px-4">Amount/Left</th>
             <th className="py-4 px-4 text-center">Status</th>
           </tr>
         </thead>
@@ -155,33 +155,58 @@ const SectionC: React.FC = () => {
                   {`...${transaction.id.slice(-4)}`} / {transaction.transaction_type}
                 </td>
                 <td onClick={() => viewAllDetail(transaction)} className="py-4 px-4">{transaction.transaction_name}</td>
-                <td onClick={() => viewAllDetail(transaction)} className="py-4 px-4">{transaction.amount.toFixed(2)}</td>
+                <td onClick={() => viewAllDetail(transaction)} className="py-4 px-4">{transaction.amount.toFixed(2)}/{transaction.balance.toFixed(2)}</td>
                 <td className="py-4 px-4 text-center">
-                  {transaction.transaction_type === "loan" &&
-                    transaction.transaction_status === "loan_pending" ? (
-                    <button className="px-3 py-1 text-xs font-semibold text-blue-700 bg-blue-100 rounded-md hover:bg-blue-200" onClick={() => payAmount(transaction)}>
-                      Pay
-                    </button>
-                  ) : transaction.transaction_type === "loan" &&
-                    transaction.transaction_status === "loan_paid" ? (
-                    <span className="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-md">
-                      Paid
-                    </span>
-                  ) : transaction.transaction_type === "lending" &&
-                    transaction.transaction_status === "lending_pending" ? (
-                    <button className="px-3 py-1 text-xs font-semibold text-orange-700 bg-orange-100 rounded-md hover:bg-orange-200">
-                      Borrow
-                    </button>
-                  ) : transaction.transaction_type === "lending" &&
-                    transaction.transaction_status === "lending_received" ? (
-                    <span className="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-md">
-                      Received
-                    </span>
-                  ) : (
-                    <span className="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-md">
-                      Success
-                    </span>
-                  )}
+                  {(() => {
+                    const { transaction_type, transaction_status } = transaction;
+
+                    if (transaction_type === "loan") {
+                      if (transaction.balance > 0) {
+                        return (
+                          <button
+                            className="px-3 py-1 text-xs font-semibold text-blue-700 bg-blue-100 rounded-md hover:bg-blue-200"
+                            onClick={() => payAmount(transaction)}
+                          >
+                            Pay
+                          </button>
+                        );
+                      }
+                      if (transaction.balance === 0) {
+                        console.log(transaction.amount, transaction.balance)
+                        return (
+                          <span className="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-md">
+                            Paid
+                          </span>
+                        );
+                      }
+                    }
+
+                    if (transaction_type === "lending") {
+                      if (transaction_status === "lending_pending") {
+                        return (
+                          <button
+                            className="px-3 py-1 text-xs font-semibold text-orange-700 bg-orange-100 rounded-md hover:bg-orange-200"
+                          >
+                            Borrow
+                          </button>
+                        );
+                      }
+                      if (transaction_status === "lending_received") {
+                        return (
+                          <span className="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-md">
+                            Received
+                          </span>
+                        );
+                      }
+                    }
+
+                    return (
+                      <span className="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-md">
+                        Success
+                      </span>
+                    );
+                  })()}
+
                   <br />
                   <p className="text-[10px]">
                     {new Date(transaction.created_at).toLocaleDateString("en-GB", {
@@ -191,6 +216,7 @@ const SectionC: React.FC = () => {
                     })}
                   </p>
                 </td>
+
               </tr>
             ))
           ) : (

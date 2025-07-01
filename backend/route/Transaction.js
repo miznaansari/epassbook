@@ -50,6 +50,11 @@ router.put('/payLoanBorrowtxn', authMiddleware, async (req, res) => {
         if (isNaN(numericAmount) || numericAmount <= 0) {
             return res.status(400).json({ error: "Invalid amount" });
         }
+        if (txn.balance - numericAmount < 0) {
+            return res.status(400).json({
+                error: `You are trying to pay ₹${numericAmount}, but only ₹${txn.balance} is available.`
+            });
+        }
 
         if (amount) txn.balance = txn.balance - numericAmount;
 
