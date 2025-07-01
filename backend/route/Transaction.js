@@ -302,13 +302,17 @@ router.post('/fetchtxn', authMiddleware, async (req, res) => {
 // Add transaction (Protected Route)
 router.post('/addtxn', authMiddleware, async (req, res) => {
     try {
-        const { transaction_name, transaction_type, transaction_status, amount, description,balance } = req.body;
+        let  { transaction_name, transaction_type, transaction_status, amount, description,balance } = req.body;
         
         // Use `req.user.id` from JWT payload instead of manually passing `user_id`
         const user_id = req.user.id;
 
         if (!transaction_name || !transaction_type || !transaction_status || !amount) {
             return res.status(400).json({ error: "All required fields must be provided" });
+        }
+
+        if(transaction_type==='spend'){
+            balance=0
         }
 
         const newTransaction = new UserTransaction({
