@@ -189,10 +189,16 @@ const TxnState: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             console.error("Error updating transaction:", error);
         }
     };
+    const deleteAccount = () => {
+        console.log('delete all data here')
+        axios.delete(`${url}/api/deleteAllTxn`, {
+            headers: { Authorization: token },
+        })
+    }
 
 
     return (
-        <TxnContext.Provider value={{ payLoanBorrowtxn, txnDetail, setTxnDetail, addtxn, fetchallamount, deletetxn, edittxn, loanAmount, lendingAmount, todayAmount, monthlyAmount, addquickitemstxn }}>
+        <TxnContext.Provider value={{ deleteAccount, payLoanBorrowtxn, txnDetail, setTxnDetail, addtxn, fetchallamount, deletetxn, edittxn, loanAmount, lendingAmount, todayAmount, monthlyAmount, addquickitemstxn }}>
             {children}
         </TxnContext.Provider>
     );

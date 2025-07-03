@@ -124,6 +124,23 @@ router.delete('/deletetxn', authMiddleware, async (req, res) => {
 });
 
 
+//deleteAllTxn
+router.delete('/deleteAllTxn', authMiddleware, async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        const result = await UserTransaction.deleteMany({ user_id: userId });
+
+        res.status(200).json({
+            message: "All transactions deleted successfully",
+            deletedCount: result.deletedCount
+        });
+    } catch (error) {
+        console.error("Error deleting transactions:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
 router.post("/fetchamount", authMiddleware, async (req, res) => {
     try {
         const userId = req.user.id;

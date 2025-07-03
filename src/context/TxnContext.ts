@@ -12,6 +12,7 @@ interface TxnContextType {
   txnDetail: TxnDetailType;
   setTxnDetail: React.Dispatch<React.SetStateAction<TxnDetailType>>;
   addtxn: () => void;
+  deleteAccount: () => void;
   edittxn: (id: string, formdata: TransactionData) => void;
   payLoanBorrowtxn: (id: string, formdata: TransactionData) => void;
   deletetxn: (id: string) => void;

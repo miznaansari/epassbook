@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Quick from "./Quick";
 import { FaUtensils, FaPlaneDeparture, FaBox, FaEllipsisH } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import AddPreviousTxn from "./Addprevioustxn";
+import TxnContext from "../context/TxnContext";
 
 const BottomNavbar: React.FC = () => {
   const [showLogout, setShowLogout] = useState(false);
@@ -11,6 +12,11 @@ const BottomNavbar: React.FC = () => {
   const [category, setCategory] = useState<string>("");
   const [isOpenTxn, setIsOpenTxn] = useState(false);
   const navigate = useNavigate();
+  const context = useContext(TxnContext);
+  if (!context) {
+    throw new Error("Login must be used within an AuthProvider");
+  }
+  const {deleteAccount} = context;
 
   const handleCategoryClick = (cat: string) => {
     setIsOpen(true);
@@ -21,7 +27,9 @@ const BottomNavbar: React.FC = () => {
     setIsOpenTxn(true);
     setShowLogout(false);
   };
-
+const handleDeleteAccount = () =>{
+  deleteAccount()
+}
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg z-50 border-t border-gray-300">
       <div className="flex justify-around py-3">
@@ -68,6 +76,14 @@ const BottomNavbar: React.FC = () => {
               className="bg-red-600 text-white px-5 py-2 rounded shadow-md hover:bg-red-500 w-full"
             >
               Logout
+            </button>
+            <button
+              onClick={() => {
+              handleDeleteAccount()  
+              }}
+              className="bg-red-600 text-white px-5 py-2 rounded shadow-md hover:bg-red-500 w-full"
+            >
+              Delete Account
             </button>
             <button
               className="bg-gray-800 text-white px-5 py-2 rounded shadow-md hover:bg-gray-700 w-full"
