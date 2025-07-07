@@ -100,7 +100,7 @@ const UpdateAndDeleteModal: React.FC<ModalProps> = ({ isOpen, onClose, txnType, 
               damping: 15,
             }}
           >
-            <h2 className="text-xl font-semibold mb-4">{txnType === 'lending' ? 'Lending Txn' : ''} {txnType === 'loan' ? 'Loan Txn' : ''} {txnType === 'spend' ? 'Spend Txn' : ''}</h2>
+            <h2 className="text-xl font-semibold mb-4">{txnType === 'lending' ? 'Lending Txn' : ''} {txnType === 'loan' ? 'Loan Txn' : ''} {txnType === 'spend' ? 'Spend Txn' : ''} {txnType === 'balance' ? 'Balance Txn' : ''}</h2>
 
             <form className="space-y-4" onSubmit={handleSubmit}>
               <div>

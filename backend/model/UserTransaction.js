@@ -13,7 +13,7 @@ const userTransactionSchema = new Schema({
   },
   transaction_type: { 
     type: String, 
-    enum: ['spend', 'loan', 'lending', 'other'], 
+    enum: ['spend', 'loan', 'lending','balance', 'other'], 
     required: true 
   },
   transaction_status: { 

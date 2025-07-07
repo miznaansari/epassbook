@@ -47,6 +47,8 @@ const UserDashboard = () => {
             <i className="fas fa-wallet text-3xl"></i>
           </div>
         </div>
+        
+        
 
         {/* Loan and Lending Amount Section */}
         <div className="grid grid-rows-2 gap-4">
