@@ -144,30 +144,23 @@ router.delete('/deleteAllTxn', authMiddleware, async (req, res) => {
 router.post("/fetchamount", authMiddleware, async (req, res) => {
     try {
         const userId = req.user.id;
-
-
         const userObjectId = new mongoose.Types.ObjectId(userId);
 
         const now = new Date();
 
-        // Convert IST to UTC by subtracting 5 hours 30 minutes
         const toUTC = (date) => new Date(date.getTime() - (5.5 * 60 * 60 * 1000));
 
-        const startOfTodayIST = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
-        const endOfTodayIST = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+        const getUTCDateRange = (startOffset = 0, endOffset = 0) => {
+            const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() + startOffset, 0, 0, 0);
+            const end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + endOffset, 23, 59, 59, 999);
+            return [toUTC(start), toUTC(end)];
+        };
 
-        const startOfTodayUTC = toUTC(startOfTodayIST);
-        const endOfTodayUTC = toUTC(endOfTodayIST);
-
-        const startOfYesterdayUTC = new Date(startOfTodayUTC);
-        startOfYesterdayUTC.setUTCDate(startOfYesterdayUTC.getUTCDate() - 1);
-        const endOfYesterdayUTC = new Date(endOfTodayUTC);
-        endOfYesterdayUTC.setUTCDate(endOfYesterdayUTC.getUTCDate() - 1);
-
-        const startOfMonthUTC = toUTC(new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0));
+        const [startToday, endToday] = getUTCDateRange(0, 0);
+        const [startYesterday, endYesterday] = getUTCDateRange(-1, -1);
+        const startOfMonthUTC = toUTC(new Date(now.getFullYear(), now.getMonth(), 1));
         const endOfMonthUTC = toUTC(new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999));
-
-        const startOfYearUTC = toUTC(new Date(now.getFullYear(), 0, 1, 0, 0, 0, 0));
+        const startOfYearUTC = toUTC(new Date(now.getFullYear(), 0, 1));
         const endOfYearUTC = toUTC(new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999));
 
         const getAmount = async (start, end) => {
@@ -175,7 +168,8 @@ router.post("/fetchamount", authMiddleware, async (req, res) => {
                 {
                     $match: {
                         user_id: userObjectId,
-                        createdAt: { $gte: start, $lte: end }
+                        createdAt: { $gte: start, $lte: end },
+                        transaction_type: { $ne: 'balance' } // Exclude 'balance'
                     }
                 },
                 {
@@ -189,13 +183,12 @@ router.post("/fetchamount", authMiddleware, async (req, res) => {
         };
 
         const [todayAmount, yesterdayAmount, monthlyAmount, yearlyAmount] = await Promise.all([
-            getAmount(startOfTodayUTC, endOfTodayUTC),
-            getAmount(startOfYesterdayUTC, endOfYesterdayUTC),
+            getAmount(startToday, endToday),
+            getAmount(startYesterday, endYesterday),
             getAmount(startOfMonthUTC, endOfMonthUTC),
             getAmount(startOfYearUTC, endOfYearUTC),
         ]);
 
-        // Use $facet to perform both aggregations in one request
         const result = await UserTransaction.aggregate([
             {
                 $match: {
@@ -204,41 +197,36 @@ router.post("/fetchamount", authMiddleware, async (req, res) => {
                 }
             },
             {
-                $facet: {
-                    loanSum: [
-                        { $match: { transaction_type: 'loan' } },
-                        {
-                            $group: {
-                                _id: null,
-                                totalAmount: { $sum: { $toDecimal: "$amount" } }
-                            }
-                        }
-                    ],
-                    lendingSum: [
-                        { $match: { transaction_type: 'lending' } },
-                        {
-                            $group: {
-                                _id: null,
-                                totalAmount: { $sum: { $toDecimal: "$amount" } }
-                            }
-                        }
-                    ]
+                $group: {
+                    _id: "$transaction_type",
+                    total: { $sum: { $toDecimal: "$amount" } }
                 }
             }
         ]);
 
-        // Extract the totals or default to "0"
-        const total_loan_amount = result[0]?.loanSum[0]?.totalAmount?.toString() || "0";
-        const total_lending_amount = result[0]?.lendingSum[0]?.totalAmount?.toString() || "0";
+        let total_loan_amount = "0";
+        let total_lending_amount = "0";
 
+        result.forEach(entry => {
+            if (entry._id === 'loan') total_loan_amount = entry.total.toString();
+            if (entry._id === 'lending') total_lending_amount = entry.total.toString();
+        });
 
-        res.json({ todayAmount, yesterdayAmount, monthlyAmount, yearlyAmount, total_loan_amount, total_lending_amount });
+        res.json({
+            todayAmount,
+            yesterdayAmount,
+            monthlyAmount,
+            yearlyAmount,
+            total_loan_amount,
+            total_lending_amount
+        });
 
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
 
 router.post('/fetchtxnLL', authMiddleware, async (req, res) => {
     try {
