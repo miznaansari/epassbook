@@ -11,6 +11,12 @@ const userTransactionSchema = new Schema({
     type: String, 
     required: true 
   },
+  useBalance: {
+  type: Number,
+  enum: [0, 1],
+  default: 0 // or 1, depending on your default behavior
+}
+,
   transaction_type: { 
     type: String, 
     enum: ['spend', 'loan', 'lending','balance', 'other'], 

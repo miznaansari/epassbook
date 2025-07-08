@@ -13,7 +13,7 @@ const UpdateAndDeleteModal: React.FC<ModalProps> = ({ isOpen, onClose, txnType, 
   const context = useContext(TxnContext);
   if (!context) return null;
 
-  const { txnDetail, setTxnDetail, addtxn } = context;
+  const { txnDetail, setTxnDetail, addtxn ,totalBalance, setTotalBalance} = context;
   const [errors, setErrors] = useState<{ amount?: string }>({});
   const [loader, setLoader] = useState(false);
 
@@ -61,8 +61,10 @@ const UpdateAndDeleteModal: React.FC<ModalProps> = ({ isOpen, onClose, txnType, 
 
     if (txnType === "balance") {
       setCurrentBalance(prev => prev + amount);
+      setTotalBalance(prev => prev + amount);
     } else if (txnType === "spend" && useBalance) {
       setCurrentBalance(prev => prev - amount);
+      setTotalBalance(prev => prev - amount);
     }
 
     setLoader(true);
@@ -101,7 +103,8 @@ const UpdateAndDeleteModal: React.FC<ModalProps> = ({ isOpen, onClose, txnType, 
                         animate={{ opacity: 1 }}
                         transition={{ duration: 1 }}
                       >
-                        ₹{currentBalance.toFixed(2)}
+                    ₹{(totalBalance ?? 0).toFixed(2)}
+
                       </motion.p>
                     </div>
                   </div>

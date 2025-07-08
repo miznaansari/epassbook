@@ -16,7 +16,7 @@ const SectionA = () => {
     return null;
   }
   const { fetchquickitems} = context1;
-  const { fetchallamount, todayAmount, monthlyAmount ,loanAmount,lendingAmount } = context;
+  const { fetchallamount, todayAmount, monthlyAmount ,loanAmount,lendingAmount,totalBalance } = context;
 
   const [animatedToday, setAnimatedToday] = useState(0);
   const [animatedMonth, setAnimatedMonth] = useState(0);
@@ -154,7 +154,7 @@ const SectionA = () => {
                 animate={{ opacity: 1 }}
                 transition={{ duration: 1 }}
               >
-                ₹{animatedToday}
+                ₹{totalBalance}
               </motion.p>
               <motion.h6
                 className="text-[12px]"

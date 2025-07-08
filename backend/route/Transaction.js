@@ -368,35 +368,81 @@ router.post('/fetchtxn', authMiddleware, async (req, res) => {
 
 // Add transaction (Protected Route)
 router.post('/addtxn', authMiddleware, async (req, res) => {
-    try {
-        let { transaction_name, transaction_type, transaction_status, amount, description, balance } = req.body;
+  try {
+    let {
+      transaction_name,
+      transaction_type,
+      transaction_status,
+      amount,
+      description,
+      balance,
+      useBalance
+    } = req.body;
 
-        // Use `req.user.id` from JWT payload instead of manually passing `user_id`
-        const user_id = req.user.id;
+    const user_id = req.user.id;
 
-        if (!transaction_name || !transaction_type || !transaction_status || !amount) {
-            return res.status(400).json({ error: "All required fields must be provided" });
-        }
-
-        if (transaction_type === 'spend') {
-            balance = 0
-        }
-
-        const newTransaction = new UserTransaction({
-            user_id,
-            transaction_name,
-            transaction_type,
-            transaction_status,
-            amount,
-            description, balance
-        });
-
-        await newTransaction.save();
-        res.status(201).json({ message: "Transaction added successfully", transaction: newTransaction });
-    } catch (error) {
-        console.error("Error adding transaction:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+    if (!transaction_name || !transaction_type || !transaction_status || !amount) {
+      return res.status(400).json({ error: "All required fields must be provided" });
     }
+
+    amount = parseFloat(amount);
+
+    // Default balance
+    if (transaction_type === 'spend') {
+      balance = 0;
+    }
+
+    // If useBalance is 1, deduct from existing balance transactions
+    if (useBalance === 1) {
+      // Fetch balance-type transactions with positive balance (FIFO order)
+      const balanceTxns = await UserTransaction.find({
+        user_id,
+        transaction_type: 'balance',
+        balance: { $gt: 0 }
+      }).sort({ createdAt: 1 });
+
+      let remainingAmount = amount;
+
+      for (const txn of balanceTxns) {
+        if (remainingAmount <= 0) break;
+
+        let availableBalance = parseFloat(txn.balance);
+        let deducted = Math.min(availableBalance, remainingAmount);
+
+        txn.balance = (availableBalance - deducted).toFixed(2);
+        await txn.save();
+
+        remainingAmount -= deducted;
+      }
+
+      if (remainingAmount > 0) {
+        return res.status(400).json({ error: "Insufficient balance to complete the transaction" });
+      }
+
+      balance = 0; // Final transaction has 0 balance
+    }
+
+    // Save new transaction
+    const newTransaction = new UserTransaction({
+      user_id,
+      transaction_name,
+      transaction_type,
+      transaction_status,
+      amount,
+      description,
+      balance,
+    });
+
+    await newTransaction.save();
+
+    res.status(201).json({
+      message: "Transaction added successfully",
+      transaction: newTransaction
+    });
+  } catch (error) {
+    console.error("Error adding transaction:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 });
 
 module.exports = router;

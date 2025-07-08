@@ -19,10 +19,15 @@ interface TxnContextType {
   addquickitemstxn: (id: any,quantity: any) => void;
 
   fetchallamount: () => void;
+setTotalBalance: React.Dispatch<React.SetStateAction<number>>;
+
+
   // todaytxn: () => void;
   todayAmount: number | null; // Ensure it matches useState type
   monthlyAmount: number | null; // Ensure it matches useState type
   loanAmount: number | null; // Ensure it matches useState type
+  totalBalance: number | null; // Ensure it matches useState type
+  
   lendingAmount: number | null; // Ensure it matches useState type
   // settodayamount: React.Dispatch<React.SetStateAction<number | null>>;
 }

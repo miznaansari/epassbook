@@ -28,6 +28,7 @@ const TxnState: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     });
 
     const [todayAmount, settodayAmount] = useState<number>(0);
+    const [totalBalance, setTotalBalance] = useState<number>(0);
     const [loanAmount, setloanAmount] = useState<number>(0);
     const [lendingAmount, setlendingAmount] = useState<number>(0);
 
@@ -129,6 +130,8 @@ const TxnState: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             console.log(response.data);
             setloanAmount(response.data.total_loan_amount)
             setlendingAmount(response.data.total_lending_amount)
+            setTotalBalance(response.data.total_balance)
+            
             settodayAmount(response.data.todayAmount);
             setmonthlyAmount(response.data.monthlyAmount);
         } catch (error) {
@@ -198,7 +201,7 @@ const TxnState: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 
     return (
-        <TxnContext.Provider value={{ deleteAccount, payLoanBorrowtxn, txnDetail, setTxnDetail, addtxn, fetchallamount, deletetxn, edittxn, loanAmount, lendingAmount, todayAmount, monthlyAmount, addquickitemstxn }}>
+        <TxnContext.Provider value={{totalBalance, setTotalBalance,deleteAccount, payLoanBorrowtxn, txnDetail, setTxnDetail, addtxn, fetchallamount, deletetxn, edittxn, loanAmount, lendingAmount, todayAmount, monthlyAmount, addquickitemstxn }}>
             {children}
         </TxnContext.Provider>
     );
