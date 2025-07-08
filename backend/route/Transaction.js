@@ -212,13 +212,33 @@ router.post("/fetchamount", authMiddleware, async (req, res) => {
             if (entry._id === 'lending') total_lending_amount = entry.total.toString();
         });
 
+
+        //current balance 
+        const balanceResult = await UserTransaction.aggregate([
+    {
+        $match: {
+            user_id: userObjectId,
+            transaction_type: 'balance'
+        }
+    },
+    {
+        $group: {
+            _id: null,
+            total_balance: { $sum: { $toDecimal: "$balance" } }
+        }
+    }
+]);
+
+const total_balance = balanceResult.length ? parseFloat(balanceResult[0].total_balance) : 0;
+
         res.json({
             todayAmount,
             yesterdayAmount,
             monthlyAmount,
             yearlyAmount,
             total_loan_amount,
-            total_lending_amount
+            total_lending_amount,
+            total_balance
         });
 
     } catch (error) {

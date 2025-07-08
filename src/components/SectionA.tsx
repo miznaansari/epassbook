@@ -133,53 +133,49 @@ const SectionA = () => {
         </div>
       </div>
 {/* //current balance  */}
-      <div className="flex gap-2 justify-around m-2 w-1/2">
-        <div className="bg-purple-500 text-white p-4 rounded-lg shadow-md flex-1" id="chart">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <i className="fas fa-wallet text-3xl"></i>
-              <div className="ml-4">
-                <h2 className="text-sm font-semibold">Current Balance </h2>
+     <div className="flex gap-2 justify-around m-2 w-1/2">
+  <div className="bg-purple-500 text-white p-4 rounded-lg shadow-md flex-1" id="chart">
+    <div className="flex items-center justify-between">
+      <div className="flex items-center">
+        <i className="fas fa-wallet text-3xl"></i>
+        <div className="ml-4">
+          <h2 className="text-sm font-semibold">Current Balance</h2>
 
-                {loading ? (
-                  <div className="mx-auto w-full max-w-sm rounded-md">
-                    <div className="flex space-x">
-                      <div className="flex-1 space-y-3">
-                        <div className="h-5 rounded bg-gray-300 animate-pulse w-full"></div>
-                        <div className="h-3 rounded bg-gray-300 animate-pulse w-full"></div>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <motion.p
-                      className="text-xl font-bold"
-                      id="spend"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 1 }}
-                    >
-                      ₹{animatedToday}
-                    </motion.p>
-                    <motion.h6
-                      className="text-[12px]"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 1 }}
-                    >
-                      ₹{animatedMonth} This Month
-                    </motion.h6>
-                  </>
-                )}
-              </div>
+          {loading ? (
+            <div className="space-y-2 animate-pulse">
+              <div className="h-5 bg-gray-300 rounded w-24"></div>
+              <div className="h-3 bg-gray-300 rounded w-16"></div>
             </div>
-            <div className="text-center cursor-pointer" id="chartView">
-              <i className="fas fa-chart-simple text-xl"></i>
-              <p className="text-[12px]">Chart view</p>
-            </div>
-          </div>
+          ) : (
+            <>
+              <motion.p
+                className="text-xl font-bold"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 1 }}
+              >
+                ₹{animatedToday}
+              </motion.p>
+              <motion.h6
+                className="text-[12px]"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 1 }}
+              >
+                ₹{animatedMonth} This Month
+              </motion.h6>
+            </>
+          )}
         </div>
       </div>
+
+      <div className="text-center cursor-pointer" id="chartView">
+        <i className="fas fa-chart-simple text-xl"></i>
+        <p className="text-[12px]">Chart view</p>
+      </div>
+    </div>
+  </div>
+</div>
 
 </div>
       <div className="flex gap-2 justify-around mt-4 m-2">
