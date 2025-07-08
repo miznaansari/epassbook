@@ -89,9 +89,9 @@ const SectionA = () => {
         <div className="bg-purple-500 text-white p-4 rounded-lg shadow-md flex-1" id="chart">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <i className="fas fa-wallet text-3xl"></i>
+              <i className="fas fa-wallet text-2xl"></i>
               <div className="ml-4">
-                <h2 className="text-sm font-semibold">Today Spend</h2>
+                <h2 className="text-xs font-semibold">Today Spend</h2>
 
                 {loading ? (
                   <div className="mx-auto w-full max-w-sm rounded-md">
@@ -125,21 +125,21 @@ const SectionA = () => {
                 )}
               </div>
             </div>
-            <div className="text-center cursor-pointer" id="chartView">
+            {/* <div className="text-center cursor-pointer" id="chartView">
               <i className="fas fa-chart-simple text-xl"></i>
               <p className="text-[12px]">Chart view</p>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
 {/* //current balance  */}
-     <div className="flex gap-2 justify-around m-2 w-1/2">
+     <div className="flex gap-2 justify-around m-2 w-1/2  ">
   <div className="bg-purple-500 text-white p-4 rounded-lg shadow-md flex-1" id="chart">
     <div className="flex items-center justify-between">
       <div className="flex items-center">
-        <i className="fas fa-wallet text-3xl"></i>
+        <i className="fas fa-wallet text-2xl"></i>
         <div className="ml-4">
-          <h2 className="text-sm font-semibold">Current Balance</h2>
+          <h2 className="text-xs font-semibold">Current Balance</h2>
 
           {loading ? (
             <div className="space-y-2 animate-pulse">
@@ -169,16 +169,13 @@ const SectionA = () => {
         </div>
       </div>
 
-      <div className="text-center cursor-pointer" id="chartView">
-        <i className="fas fa-chart-simple text-xl"></i>
-        <p className="text-[12px]">Chart view</p>
-      </div>
+ 
     </div>
   </div>
 </div>
 
 </div>
-      <div className="flex gap-2 justify-around mt-4 m-2">
+      <div className="flex gap-2 justify-around mt-2 m-2">
         <div className="bg-red-500 text-white p-4 rounded-lg shadow-md flex-1 hover:bg-red-400 transition-all">
           <div className="flex items-center">
             <i className="fas fa-file-invoice text-3xl"></i>
