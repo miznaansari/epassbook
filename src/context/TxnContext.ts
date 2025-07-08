@@ -42,6 +42,7 @@ interface TxnDetailType {
   transaction_status: string;
   amount: string;
   description: string;
+  useBalance: number;
 }
 
 // Create Context with default null

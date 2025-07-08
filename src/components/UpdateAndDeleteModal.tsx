@@ -13,13 +13,12 @@ const UpdateAndDeleteModal: React.FC<ModalProps> = ({ isOpen, onClose, txnType, 
   const context = useContext(TxnContext);
   if (!context) return null;
 
-  const { txnDetail, setTxnDetail, addtxn ,totalBalance, setTotalBalance} = context;
+  const { txnDetail, setTxnDetail, addtxn, totalBalance, setTotalBalance } = context;
   const [errors, setErrors] = useState<{ amount?: string }>({});
   const [loader, setLoader] = useState(false);
 
   const [currentBalance, setCurrentBalance] = useState(0);
   const [previousBalance, setPreviousBalance] = useState(0);
-  const [useBalance, setUseBalance] = useState(false); // checkbox for spending balance
 
   const txnTypeMap: Record<string, string> = {
     lending: "Lending Txn",
@@ -54,6 +53,9 @@ const UpdateAndDeleteModal: React.FC<ModalProps> = ({ isOpen, onClose, txnType, 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+
+
     if (errors.amount) return;
 
     const amount = parseFloat(txnDetail.amount) || 0;
@@ -62,7 +64,7 @@ const UpdateAndDeleteModal: React.FC<ModalProps> = ({ isOpen, onClose, txnType, 
     if (txnType === "balance") {
       setCurrentBalance(prev => prev + amount);
       setTotalBalance(prev => prev + amount);
-    } else if (txnType === "spend" && useBalance) {
+    } else if (txnType === "spend" && txnDetail.useBalance) {
       setCurrentBalance(prev => prev - amount);
       setTotalBalance(prev => prev - amount);
     }
@@ -103,7 +105,7 @@ const UpdateAndDeleteModal: React.FC<ModalProps> = ({ isOpen, onClose, txnType, 
                         animate={{ opacity: 1 }}
                         transition={{ duration: 1 }}
                       >
-                    ₹{(totalBalance ?? 0).toFixed(2)}
+                        ₹{(totalBalance ?? 0).toFixed(2)}
 
                       </motion.p>
                     </div>
@@ -161,8 +163,13 @@ const UpdateAndDeleteModal: React.FC<ModalProps> = ({ isOpen, onClose, txnType, 
                 <label className="flex items-center gap-2 text-sm">
                   <input
                     type="checkbox"
-                    checked={useBalance}
-                    onChange={() => setUseBalance(!useBalance)}
+                checked={txnDetail.useBalance === 1}
+                    onChange={(e) =>
+                      setTxnDetail((prev) => ({
+                        ...prev,
+                        useBalance: e.target.checked ? 1 : 0,
+                      }))
+                    }
                   />
                   Use Balance
                 </label>

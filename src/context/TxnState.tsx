@@ -25,6 +25,7 @@ const TxnState: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         transaction_status: "",
         amount: "",
         description: "",
+        useBalance: 0,
     });
 
     const [todayAmount, settodayAmount] = useState<number>(0);
