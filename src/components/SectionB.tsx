@@ -13,14 +13,14 @@ const SectionB = () => {
   };
 
   return (
-    <div className="flex gap-2 justify-around mt-4">
+    <div className="flex gap-1 justify-around mt-4 overflow-x-auto">
        {/* Add Spend Button */}
       <button
         onClick={() => openModal("balance","success")}
         className="bg-purple-500 text-white p-3 rounded-lg shadow-md hover:bg-purple-600 flex items-center text-xs space-x-2"
       >
         <i className="fas fa-wallet text-sm"></i>
-        <span>Add Balance</span>
+        <span>Add Bal</span>
       </button>
       {/* Add Spend Button */}
       <button
