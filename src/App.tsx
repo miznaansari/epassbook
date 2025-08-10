@@ -10,6 +10,7 @@ import TxnState from "./context/TxnState";
 import QuickState from "./context/QuickState";
 import axios from "axios";
 import BottomNavbar from "./components/BottomNavbar";
+import TxnView from "./components/TxnView/TxnView";
 
 // 🔹 Protected Routes Component (Handles Authentication)
 const ProtectedRoutes: React.FC = () => {
@@ -77,6 +78,7 @@ const App: React.FC = () => {
           <Router>
             <Routes>
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/txnview" element={<TxnView />} />
               <Route path="/" element={<ProtectedRoutes />} />
             </Routes>
           </Router>

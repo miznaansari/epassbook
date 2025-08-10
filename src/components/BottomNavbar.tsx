@@ -37,10 +37,18 @@ const handleDeleteAccount = () =>{
           { icon: <FaUtensils />, label: "Food", category: "food" },
           { icon: <FaPlaneDeparture />, label: "Travel", category: "travel" },
           { icon: <FaBox />, label: "Expenses", category: "expenses" },
+          { icon: <FaBox />, label: "View History", category: "history" },
         ].map(({ icon, label, category }) => (
           <button
             key={category}
-            onClick={() => handleCategoryClick(category)}
+            onClick={() => {
+              if(category === "history") {
+                                navigate("/txnview");
+
+              } else {
+                handleCategoryClick(category);
+              }
+            }}
             className="flex flex-col items-center text-gray-600 hover:text-purple-600 transition-all duration-200"
           >
             <div className="text-xl">{icon}</div>
