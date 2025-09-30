@@ -307,7 +307,7 @@ router.post('/fetchtxnLL', authMiddleware, async (req, res) => {
 router.post('/fetchtxn', authMiddleware, async (req, res) => {
     try {
         const user_id = req.user.id;
-        const { filter } = req.body; // Accept filter type from request
+        const { filter, fromDate, toDate } = req.body; // Added fromDate & toDate for manual filter
 
         let startDate, endDate;
 
@@ -315,12 +315,12 @@ router.post('/fetchtxn', authMiddleware, async (req, res) => {
         const now = new Date();
 
         switch (filter) {
-            case "today":  // Fetch today's transactions
+            case "today":
                 startDate = new Date(now.setHours(0, 0, 0, 0));
                 endDate = new Date(now.setHours(23, 59, 59, 999));
                 break;
 
-            case "yesterday":  // Fetch yesterday's transactions
+            case "yesterday":
                 startDate = new Date();
                 startDate.setDate(now.getDate() - 1);
                 startDate.setHours(0, 0, 0, 0);
@@ -329,19 +329,33 @@ router.post('/fetchtxn', authMiddleware, async (req, res) => {
                 endDate.setHours(23, 59, 59, 999);
                 break;
 
-            case "monthly":  // Fetch transactions for the current month
+            case "monthly":
                 startDate = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
                 endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
                 break;
 
-            case "yearly":  // Fetch transactions for the current year
+            case "yearly":
                 startDate = new Date(now.getFullYear(), 0, 1, 0, 0, 0, 0);
                 endDate = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
                 break;
 
-            case "all": // Fetch all transactions
+            case "all":
                 startDate = null;
                 endDate = null;
+                break;
+
+            case "manual":
+                if (!fromDate || !toDate) {
+                    return res.status(400).json({
+                        success: false,
+                        message: "fromDate and toDate are required for manual filter"
+                    });
+                }
+                startDate = new Date(fromDate);
+                startDate.setHours(0, 0, 0, 0);
+
+                endDate = new Date(toDate);
+                endDate.setHours(23, 59, 59, 999);
                 break;
 
             default:
@@ -350,20 +364,18 @@ router.post('/fetchtxn', authMiddleware, async (req, res) => {
 
         let query = { user_id: user_id };
 
-        // Apply date filter only if not fetching "all" transactions
         if (startDate && endDate) {
             query.createdAt = { $gte: startDate, $lt: endDate };
         }
 
-        // Fetch transactions
         const txn = await UserTransaction.find(query);
 
         res.status(200).json({ success: true, transactions: txn });
     } catch (error) {
+        console.error(error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
-
 
 
 // Add transaction (Protected Route)
